@@ -2,9 +2,9 @@
 /**
  * Turns full-size captures into the two widths the page serves.
  *
- *   node landing/tools/optimize-shots.mjs [--keep-originals] [--originals <dir>] [--only a,b]
+ *   node tools/optimize-shots.mjs [--keep-originals] [--originals <dir>] [--only a,b]
  *
- * For every landing/assets/shots/<demo>/<name>.(jpg|png) it writes
+ * For every assets/shots/<demo>/<name>.(jpg|png) it writes
  * <name>-1280.webp and <name>-2400.webp, then moves the original out of the
  * site (default ~/.cache/designlayer-site/originals/<demo>/) so the published
  * folder holds only what the page loads. A capture is re-encoded only when it
@@ -14,8 +14,8 @@
  * WebP because a UI screenshot is a third of the bytes it is as a JPEG at the
  * same sharpness: the 2400px hero is ~170 KB against ~500 KB.
  *
- * Also writes landing/assets/shots/demos.json from each demo's manifest.json, and
- * landing/assets/og.jpg (1200x630, JPEG because share cards want one) from the
+ * Also writes assets/shots/demos.json from each demo's manifest.json, and
+ * assets/og.jpg (1200x630, JPEG because share cards want one) from the
  * first demo's hero.
  *
  * Encoding is Pillow's (`python3 -m pip install pillow`). Point SITE_PYTHON at

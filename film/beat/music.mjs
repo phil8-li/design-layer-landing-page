@@ -2,11 +2,11 @@
 /**
  * Renders the soundtracks in scores.mjs.
  *
- *   node landing/film/beat/music.mjs            all three cuts
- *   node landing/film/beat/music.mjs a c        some
+ *   node film/beat/music.mjs            all three cuts
+ *   node film/beat/music.mjs a c        some
  *
  * Writes /tmp/designlayer-film/beat/<cut>.wav and .m4a (for listening and for
- * muxing), and landing/film/beat/cues/<cut>.json, which the film reads so its
+ * muxing), and film/beat/cues/<cut>.json, which the film reads so its
  * cuts land on the music's beats.
  */
 

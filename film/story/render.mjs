@@ -2,10 +2,10 @@
 /**
  * Renders a story cut (index.html?cut=<id>) frame by frame, silent.
  *
- *   node landing/film/story/render.mjs d                        → /tmp/designlayer-film/story/cut-d.mp4 (1080p30)
- *   node landing/film/story/render.mjs d --fps 60
- *   node landing/film/story/render.mjs d --frames DIR --at 3,7.5,12
- *   node landing/film/story/render.mjs d --from 9 --to 15
+ *   node film/story/render.mjs d                        → /tmp/designlayer-film/story/cut-d.mp4 (1080p30)
+ *   node film/story/render.mjs d --fps 60
+ *   node film/story/render.mjs d --frames DIR --at 3,7.5,12
+ *   node film/story/render.mjs d --from 9 --to 15
  *
  * The page asks for frames/<name>; this script answers from the captured
  * session in ~/.cache/designlayer-site/story/midday (FRAMES=/dir overrides),

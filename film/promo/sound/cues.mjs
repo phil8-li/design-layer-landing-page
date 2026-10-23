@@ -3,7 +3,7 @@
  * Writes a cut's events (cut.cues, published by the page as window.CUES) to JSON,
  * so the sound is laid against the same clock as the picture.
  *
- *   node landing/film/promo/sound/cues.mjs t            → ~/.cache/designlayer-site/sound/t/cues.json
+ *   node film/promo/sound/cues.mjs t            → ~/.cache/designlayer-site/sound/t/cues.json
  */
 
 import fs from "node:fs"

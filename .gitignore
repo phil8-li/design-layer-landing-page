@@ -1,0 +1,7 @@
+# Screenshots from the browser pass of `node check.mjs`. Regenerate, never commit.
+.check/
+
+# Python bytecode from the film sound tools.
+__pycache__/
+
+.DS_Store

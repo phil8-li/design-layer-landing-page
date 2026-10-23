@@ -3,7 +3,7 @@
 show where each sound sits against the picture (and so the sound can be read without
 being heard).
 
-  python3 landing/film/promo/sound/picture.py t keynote out.png
+  python3 film/promo/sound/picture.py t keynote out.png
 """
 import json, sys
 from pathlib import Path

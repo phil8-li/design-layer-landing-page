@@ -1,0 +1,60 @@
+name: Pages
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# One queue per branch, and only a superseded pull request run is cancelled. A
+# shared group let any pull request's run cancel the deploy from main, so the
+# site could stay on an old build while every check on main read green.
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      # LFS stays off: film/iterations is reference material, never deployed.
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+
+      # The static half needs no browser: markup, metadata, every local
+      # reference, and the page-weight budget. The browser half runs locally
+      # with Playwright; see README.md.
+      - run: node check.mjs --only static
+
+      # DESIGN.md tokens against styles.css, and the get-started commands.
+      - run: npm test
+
+      # Publish only what the page loads, not the tools that build and check it.
+      # The leading slash anchors each pattern to the repository root, so `/film`
+      # (the film's sources and iterations) does not also drop assets/film/.
+      - run: rsync -a --exclude /.git --exclude /.github --exclude /tools --exclude /film --exclude /test --exclude /check.mjs --exclude /serve.mjs --exclude /README.md --exclude /AGENTS.md --exclude /DESIGN.md --exclude /package.json --exclude /.check --exclude .gitignore --exclude .gitattributes ./ "$RUNNER_TEMP/site/"
+
+      - uses: actions/upload-pages-artifact@v5
+        if: github.event_name != 'pull_request'
+        with:
+          path: ${{ runner.temp }}/site
+
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: check
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

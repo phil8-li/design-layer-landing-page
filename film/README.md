@@ -1,6 +1,6 @@
 # Launch film
 
-A 50 s silent motion piece built from the real screenshots in `landing/assets/shots/<demo>/`.
+A 50 s silent motion piece built from the real screenshots in `assets/shots/<demo>/`.
 
 - `index.html`, `film.css`, `film.js`: the composition, 1920×1080. Every frame is a pure function of time. `window.seek(t)` sets every layer from easing curves. Nothing uses CSS transitions, animations or timers.
 - `render.mjs` loads the composition in Playwright Chromium, seeks and screenshots each frame, and pipes the frames into ffmpeg.
@@ -8,21 +8,21 @@ A 50 s silent motion piece built from the real screenshots in `landing/assets/sh
 ## Render
 
 ```sh
-node landing/film/render.mjs                    # ~2.5 min: 60 fps master → launch.mp4, launch-720.mp4, launch-poster.jpg
-node landing/film/render.mjs --demo midday      # pick the screenshot set (default midday)
-node landing/film/render.mjs --from 26 --to 32  # preview a range → /tmp/designlayer-film/preview.mp4
-node landing/film/render.mjs --frames /tmp/stills --at 9.6,12.6,28.5   # stills at given seconds
-node landing/film/render.mjs --encode-only      # re-encode the last master
-node landing/film/render.mjs --fps 30           # 30 fps master instead of 60
+node film/render.mjs                    # ~2.5 min: 60 fps master → launch.mp4, launch-720.mp4, launch-poster.jpg
+node film/render.mjs --demo midday      # pick the screenshot set (default midday)
+node film/render.mjs --from 26 --to 32  # preview a range → /tmp/designlayer-film/preview.mp4
+node film/render.mjs --frames /tmp/stills --at 9.6,12.6,28.5   # stills at given seconds
+node film/render.mjs --encode-only      # re-encode the last master
+node film/render.mjs --fps 30           # 30 fps master instead of 60
 ```
 
-To scrub by hand, run `node landing/serve.mjs` and open `/film/?demo=midday`. Then call `seek(12.5)` in the console.
+To scrub by hand, run `node serve.mjs` and open `/film/?demo=midday`. Then call `seek(12.5)` in the console.
 
 Overrides: `FFMPEG=/path/to/ffmpeg`, `PLAYWRIGHT=/path/to/node_modules/` and `ORIGINALS=/dir`. The defaults are `ffmpeg` on PATH, Playwright resolved from this folder, and `~/.cache/designlayer-site/originals`.
 
-## Outputs (`landing/assets/film/`)
+## Outputs (`assets/film/`)
 
-The landing page now plays the approved cut instead: One move (`promo/`, cut `t`) with the Trailer score, published by `node landing/film/promo/publish.mjs t trailer`. Running `render.mjs` overwrites it with this film, so publish again after any render here.
+The landing page now plays the approved cut instead: One move (`promo/`, cut `t`) with the Trailer score, published by `node film/promo/publish.mjs t trailer`. Running `render.mjs` overwrites it with this film, so publish again after any render here.
 
 | File | Format |
 |---|---|
@@ -36,7 +36,7 @@ This film's own renders were silent, 1080p30 and 720p60. At ~600 kb/s, 1080p60 s
 
 The film reads `app-only, hero, measure, tokens, canvas, notes, changes` plus `agent.json` and `diff.txt`. Any file the demo lacks comes from `midday`.
 
-The site publishes shots only as `<name>-1280.webp` and `<name>-2400.webp`. The film requests `<name>.jpg`, and `render.mjs` answers those requests with the 3200×2000 originals in `~/.cache/designlayer-site/originals/<demo>/` (written by `landing/tools/optimize-shots.mjs`), so zoomed beats stay sharp. When an original is missing, as when you scrub through `serve.mjs`, the film falls back to `-2400.webp`.
+The site publishes shots only as `<name>-1280.webp` and `<name>-2400.webp`. The film requests `<name>.jpg`, and `render.mjs` answers those requests with the 3200×2000 originals in `~/.cache/designlayer-site/originals/<demo>/` (written by `tools/optimize-shots.mjs`), so zoomed beats stay sharp. When an original is missing, as when you scrub through `serve.mjs`, the film falls back to `-2400.webp`.
 
 - **Handoff (beats 10–11):** the Changes tab, `agent.json` and `diff.txt` come from one demo. That demo needs a `diff.txt` and an `agent.json` that is not a `wait_for_change` timeout, so the three tell one story.
 - **Detected from pixels:** the hero selection outline (its size becomes the label), the note pins (they also set the notes framing), and the "Send to agent" button (it sets the Changes crop).
@@ -53,12 +53,12 @@ Three edits of the film, each with an original soundtrack and its cuts timed to 
 | `c` Groove | 100 BPM swung funk in C | Bouncy type, springy UI, a stop before the logo |
 
 ```sh
-node landing/film/beat/music.mjs          # all three → /tmp/designlayer-film/beat/<cut>.wav and landing/film/beat/cues/<cut>.json
-node landing/film/beat/render.mjs a       # frames + soundtrack → /tmp/designlayer-film/beat/cut-a.mp4 (~2.5 min)
-node landing/film/beat/render.mjs a --frames /tmp/stills --at 7.8,27.1
+node film/beat/music.mjs          # all three → /tmp/designlayer-film/beat/<cut>.wav and film/beat/cues/<cut>.json
+node film/beat/render.mjs a       # frames + soundtrack → /tmp/designlayer-film/beat/cut-a.mp4 (~2.5 min)
+node film/beat/render.mjs a --frames /tmp/stills --at 7.8,27.1
 ```
 
-`scores.mjs` writes each score against a beat grid and exports a cue map: the BPM, the kick and snare times, and named marks such as `drop` and `logo`. `cuts.js` places every scene, word and whoosh on those marks, so changing a score's arrangement moves the edit with it. To preview a cut by hand, run `node landing/serve.mjs`, open `/film/beat/?cut=a`, and call `seek(t)` in the console.
+`scores.mjs` writes each score against a beat grid and exports a cue map: the BPM, the kick and snare times, and named marks such as `drop` and `logo`. `cuts.js` places every scene, word and whoosh on those marks, so changing a score's arrangement moves the edit with it. To preview a cut by hand, run `node serve.mjs`, open `/film/beat/?cut=a`, and call `seek(t)` in the console.
 
 ## Story cuts (`story/`)
 
@@ -72,8 +72,8 @@ Three silent edits of one real editing session: select the headline, set its col
 
 ```sh
 node ../designlayer-demos/story/capture-story.mjs   # the session → ~/.cache/designlayer-site/story/midday (needs the demo app and its editor running)
-node landing/film/story/render.mjs d                   # → /tmp/designlayer-film/story/cut-d.mp4 (~45 s)
-node landing/film/story/render.mjs d --frames /tmp/stills --at 11,14.6
+node film/story/render.mjs d                   # → /tmp/designlayer-film/story/cut-d.mp4 (~45 s)
+node film/story/render.mjs d --frames /tmp/stills --at 11,14.6
 ```
 
 The capture also records where things are (`rects.json`: the selection, the Color field, the picker, the composer, the Send button), so a recapture moves the pointer and the framings with it.
@@ -113,12 +113,12 @@ node ../designlayer-demos/story/capture-cta.mjs      # the j k l session → ~/.
 node ../designlayer-demos/story/capture-tune.mjs     # the m n o session → ~/.cache/designlayer-site/story/midday-tune
 node ../designlayer-demos/story/capture-r6.mjs       # the p … t session → ~/.cache/designlayer-site/story/midday-r6
 node ../designlayer-demos/story/capture-r6-hover4.mjs  # then the hover patches again, at 4x, for close-ups
-node landing/film/promo/render.mjs g                    # → /tmp/designlayer-film/promo/cut-g.mp4 (~40 s)
-node landing/film/promo/render.mjs p --ss 2             # rendered at 2x and scaled to 1080p: still edges while moving
-node landing/film/promo/render.mjs k --frames /tmp/stills --at 2.9,15
+node film/promo/render.mjs g                    # → /tmp/designlayer-film/promo/cut-g.mp4 (~40 s)
+node film/promo/render.mjs p --ss 2             # rendered at 2x and scaled to 1080p: still edges while moving
+node film/promo/render.mjs k --frames /tmp/stills --at 2.9,15
 ```
 
-Cut `t` has five sound designs, laid against the cut's own cue sheet (`cut.cues`): Keynote, Effortless, and Kinetic (round 7), then Effortless rescored as Cinematic and Trailer (round 8). Trailer is the pick, and the landing page plays it: `node landing/film/promo/publish.mjs t trailer` encodes it into `landing/assets/film/`. See `promo/sound/README.md`.
+Cut `t` has five sound designs, laid against the cut's own cue sheet (`cut.cues`): Keynote, Effortless, and Kinetic (round 7), then Effortless rescored as Cinematic and Trailer (round 8). Trailer is the pick, and the landing page plays it: `node film/promo/publish.mjs t trailer` encodes it into `assets/film/`. See `promo/sound/README.md`.
 
 A plate's picture is scaled to five decimals (`f5` in `promo.js`): at two, a lifted card's picture landed up to 5 px off its card, differently each frame, which read as shake. A cut can name patch frames (`cut.patch`: frames that cover part of the page, at a rect in rects.json, feathered onto the frame under them) and the frames the editor's side strips can show (`cut.stripFrames`).
 

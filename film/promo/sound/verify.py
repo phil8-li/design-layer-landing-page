@@ -6,7 +6,7 @@ too; this catches what an ear can miss and what nobody can hear without listenin
   - the muxed film's audio is the mix, not shifted (cross-correlation),
   - the loudness follows the story, section by section, and nothing clips.
 
-  python3 landing/film/promo/sound/verify.py t keynote
+  python3 film/promo/sound/verify.py t keynote
 """
 import json, subprocess, sys
 from pathlib import Path

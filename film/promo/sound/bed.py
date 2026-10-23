@@ -2,7 +2,7 @@
 """Generates a music bed for a cut, steered section by section
 against the cut's cues (cues.mjs), so the music's energy follows the story.
 
-  MUSIC_API_KEY=... python3 landing/film/promo/sound/bed.py t keynote --take 1
+  MUSIC_API_KEY=... python3 film/promo/sound/bed.py t keynote --take 1
   → ~/.cache/designlayer-site/sound/t/keynote/bed-1.wav (48 kHz stereo) and bed-1.json (what was sent, when)
 
 Each direction sits in one of the tempo bands from the Apple breakdown: 60-80 BPM

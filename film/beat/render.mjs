@@ -2,11 +2,11 @@
 /**
  * Renders a beat cut (index.html?cut=<id>) frame by frame and muxes its soundtrack.
  *
- *   node landing/film/beat/render.mjs a                       → /tmp/designlayer-film/beat/cut-a.mp4 (1080p30 + AAC)
- *   node landing/film/beat/render.mjs a --fps 60              60 fps
- *   node landing/film/beat/render.mjs a --out FILE            write somewhere else
- *   node landing/film/beat/render.mjs a --frames DIR --at 1,7.8,27   stills at those seconds
- *   node landing/film/beat/render.mjs a --from 7 --to 12      a range, with its audio
+ *   node film/beat/render.mjs a                       → /tmp/designlayer-film/beat/cut-a.mp4 (1080p30 + AAC)
+ *   node film/beat/render.mjs a --fps 60              60 fps
+ *   node film/beat/render.mjs a --out FILE            write somewhere else
+ *   node film/beat/render.mjs a --frames DIR --at 1,7.8,27   stills at those seconds
+ *   node film/beat/render.mjs a --from 7 --to 12      a range, with its audio
  *
  * Run music.mjs first: the film reads cues/<id>.json and the mux needs
  * /tmp/designlayer-film/beat/<id>.wav. Shots resolve like ../render.mjs: the

@@ -2,12 +2,12 @@
 /**
  * Pre-ship checks for the static landing page in this directory.
  *
- *   node landing/check.mjs                    static + browser checks
- *   node landing/check.mjs --only static      no browser
- *   node landing/check.mjs --only browser
- *   node landing/check.mjs --shots-only       just the screenshots
- *   node landing/check.mjs --keep             leave the server up afterwards
- *   node landing/check.mjs --root <dir>       check another directory
+ *   node check.mjs                    static + browser checks
+ *   node check.mjs --only static      no browser
+ *   node check.mjs --only browser
+ *   node check.mjs --shots-only       just the screenshots
+ *   node check.mjs --keep             leave the server up afterwards
+ *   node check.mjs --root <dir>       check another directory
  *
  * Static checks read the files: index.html parses, head metadata, one <h1>,
  * heading order, <img> alt/width/height, every local reference (HTML, CSS
@@ -63,7 +63,7 @@ const ROOT = path.resolve(option("--root") ?? HERE)
 const SHOTS = path.join(ROOT, ".check")
 
 if (only && only !== "static" && only !== "browser") {
-  console.error("usage: node landing/check.mjs [--only static|browser] [--shots-only] [--keep] [--root <dir>]")
+  console.error("usage: node check.mjs [--only static|browser] [--shots-only] [--keep] [--root <dir>]")
   process.exit(2)
 }
 

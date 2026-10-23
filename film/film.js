@@ -472,7 +472,7 @@
       tokens: g("tokens", "tokens"), canvas: g("canvas", "canvas"), notes: g("notes", "notes"), changes: g("changes", "changes"),
     }
     // Measured geometry beats the hand-tuned numbers when a capture recorded
-    // it: the panel seams (landing/tools/optimize-shots.mjs) and the board's
+    // it: the panel seams (tools/optimize-shots.mjs) and the board's
     // Current frame (the capture's manifest), so a recapture needs no re-measure.
     {
       const demos = (await fetchJson(`${SHOTS}demos.json`)) || []

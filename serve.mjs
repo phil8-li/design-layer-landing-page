@@ -2,8 +2,8 @@
 /**
  * Static server for the landing page in this directory.
  *
- *   node landing/serve.mjs                 http://127.0.0.1:4321
- *   node landing/serve.mjs --port 8080 --root <dir>
+ *   node serve.mjs                 http://127.0.0.1:4321
+ *   node serve.mjs --port 8080 --root <dir>
  *
  *   import { startServer } from "./serve.mjs"
  *   const { url, close } = await startServer({ root, port: 0 })
@@ -178,7 +178,7 @@ if (isMain) {
   const option = (name) => (args.includes(name) ? args[args.indexOf(name) + 1] : null)
   const port = Number(option("--port") ?? 4321)
   if (!Number.isInteger(port) || port < 0 || port > 65535) {
-    console.error("usage: node landing/serve.mjs [--port 4321] [--root <dir>]")
+    console.error("usage: node serve.mjs [--port 4321] [--root <dir>]")
     process.exit(2)
   }
   try {

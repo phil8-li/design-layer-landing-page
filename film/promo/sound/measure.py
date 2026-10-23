@@ -5,8 +5,8 @@ how busy it is (onsets per second) and how much percussion it carries (energy ab
 5 kHz in transients); the tempo the bed actually keeps; and how well its energy follows
 the plan (correlation of section loudness with the density each section asked for).
 
-  python3 landing/film/promo/sound/measure.py t keynote        → every take of that option, best first
-  python3 landing/film/promo/sound/measure.py t cinematic 6 --bars 19 37
+  python3 film/promo/sound/measure.py t keynote        → every take of that option, best first
+  python3 film/promo/sound/measure.py t cinematic 6 --bars 19 37
       → a composed take's tempo, first downbeat and loudness beat by beat, one row per bar
         (the groove's body given in take seconds): what its cut list (mix.py CUTS) is read from
 """

@@ -4,7 +4,7 @@ own band (2-8 kHz for the interface's small sounds, full band otherwise) over th
 in that band, at the effect's loudest 10 ms (or 50 ms for long sounds). Above 0 dB an effect
 reads clearly; a few dB below it is felt more than heard; far below, it is masked.
 
-  python3 landing/film/promo/sound/audibility.py t keynote
+  python3 film/promo/sound/audibility.py t keynote
 """
 import json, sys
 from pathlib import Path

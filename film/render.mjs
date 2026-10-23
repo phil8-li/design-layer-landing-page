@@ -1,15 +1,15 @@
 #!/usr/bin/env node
 /**
- * Render the launch film (landing/film/index.html) to MP4, frame by frame.
+ * Render the launch film (film/index.html) to MP4, frame by frame.
  *
- *   node landing/film/render.mjs                      60 fps master → launch.mp4 (1080p30), launch-720.mp4 (720p60), poster
- *   node landing/film/render.mjs --fps 30             render the master at 30 fps (both files then 30 fps)
- *   node landing/film/render.mjs --from 10 --to 14    preview a range → /tmp/designlayer-film/preview.mp4
- *   node landing/film/render.mjs --frames DIR --at 1.2,9,20   dump stills at those seconds (no video)
- *   node landing/film/render.mjs --frames DIR --from 7 --to 8 --fps 10   dump every frame of a range
- *   node landing/film/render.mjs --demo midday        screenshot set under landing/assets/shots/<demo>/ (default midday)
- *   node landing/film/render.mjs --encode-only        re-encode the last master without re-rendering
- *   node landing/film/render.mjs --poster-at 9.6      which second becomes launch-poster.jpg
+ *   node film/render.mjs                      60 fps master → launch.mp4 (1080p30), launch-720.mp4 (720p60), poster
+ *   node film/render.mjs --fps 30             render the master at 30 fps (both files then 30 fps)
+ *   node film/render.mjs --from 10 --to 14    preview a range → /tmp/designlayer-film/preview.mp4
+ *   node film/render.mjs --frames DIR --at 1.2,9,20   dump stills at those seconds (no video)
+ *   node film/render.mjs --frames DIR --from 7 --to 8 --fps 10   dump every frame of a range
+ *   node film/render.mjs --demo midday        screenshot set under assets/shots/<demo>/ (default midday)
+ *   node film/render.mjs --encode-only        re-encode the last master without re-rendering
+ *   node film/render.mjs --poster-at 9.6      which second becomes launch-poster.jpg
  *
  * The site publishes shots as webp only. The film asks for <name>.jpg, and this
  * script answers those requests with the 2x JPEG originals from ORIGINALS

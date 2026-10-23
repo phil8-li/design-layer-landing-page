@@ -9,6 +9,7 @@
     "serve": "node serve.mjs",
     "check": "node check.mjs",
     "check:static": "node check.mjs --only static",
+    "test": "node test/design-md-cases.mjs && node test/get-started-cases.mjs",
     "film": "node film/render.mjs"
   }
 }

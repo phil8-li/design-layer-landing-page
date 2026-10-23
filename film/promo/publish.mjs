@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 /**
  * Publishes a scored cut to the landing page's film dialog. It writes three files to
- * landing/assets/film/: launch.mp4 at 1080p and launch-720.mp4 for narrow screens, each a
+ * assets/film/: launch.mp4 at 1080p and launch-720.mp4 for narrow screens, each a
  * two-pass H.264 encode with AAC sound under the site's 4 MB video budget (check.mjs),
  * and launch-poster.jpg, one frame of the cut.
  *
- *   node landing/film/promo/publish.mjs t trailer               # the approved cut: One move, Trailer score
- *   node landing/film/promo/publish.mjs t trailer --poster 10   # the poster frame, in seconds
+ *   node film/promo/publish.mjs t trailer               # the approved cut: One move, Trailer score
+ *   node film/promo/publish.mjs t trailer --poster 10   # the poster frame, in seconds
  *
  * The picture comes from render.mjs (/tmp/designlayer-film/promo/cut-<cut>.mp4) and the sound
  * from sound/mix.py (~/.cache/designlayer-site/sound/<cut>/<option>/mix.wav), so the published
@@ -23,7 +23,7 @@ const HERE = path.dirname(fileURLToPath(import.meta.url))
 const OUT = path.join(HERE, "../../assets/film")
 const FFMPEG = process.env.FFMPEG ||
   "ffmpeg"
-const BUDGET = 4 * 1024 * 1024 // bytes per video file, as landing/check.mjs enforces
+const BUDGET = 4 * 1024 * 1024 // bytes per video file, as check.mjs enforces
 const AUDIO_KBPS = 128
 
 const args = process.argv.slice(2)

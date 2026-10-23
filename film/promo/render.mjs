@@ -2,11 +2,11 @@
 /**
  * Renders a promo cut (index.html?cut=<id>) frame by frame, silent.
  *
- *   node landing/film/promo/render.mjs g                        → /tmp/designlayer-film/promo/cut-g.mp4 (1080p30)
- *   node landing/film/promo/render.mjs g --fps 60
- *   node landing/film/promo/render.mjs g --frames DIR --at 3,7.5,12
- *   node landing/film/promo/render.mjs g --from 9 --to 15
- *   node landing/film/promo/render.mjs p --ss 2               (rendered at 2x, scaled to 1080p)
+ *   node film/promo/render.mjs g                        → /tmp/designlayer-film/promo/cut-g.mp4 (1080p30)
+ *   node film/promo/render.mjs g --fps 60
+ *   node film/promo/render.mjs g --frames DIR --at 3,7.5,12
+ *   node film/promo/render.mjs g --from 9 --to 15
+ *   node film/promo/render.mjs p --ss 2               (rendered at 2x, scaled to 1080p)
  *
  * The page asks for frames/<session>/<name>; this script answers from the
  * captured sessions in ~/.cache/designlayer-site/story/ (FRAMES_ROOT=/dir

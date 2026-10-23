@@ -1,13 +1,15 @@
 # Design Layer landing page
 
-The marketing site for [DesignLayer](../README.md), and every launch film cut
-made for it. It is a self-contained module: nothing in the editor imports it,
-and it imports nothing from the editor at runtime, so it can move to its own
-repository unchanged (see [Moving it to its own repo](#moving-it-to-its-own-repo)).
+The marketing site for [DesignLayer](https://github.com/phil8-li/design-layer),
+and every launch film cut made for it. Nothing in the editor imports it, and it
+imports nothing from the editor at runtime. Its history up to 2026-10-22 is
+`landing/` in phil8-li/design-layer.
 
 A single static page: `index.html`, `styles.css`, `main.js`, and `assets/`. No
-build step and no dependencies. `.github/workflows/landing.yml` publishes it to
-[GitHub Pages](https://phil8-li.github.io/design-layer/) on every push to `main`.
+build step and no dependencies. `.github/workflows/pages.yml` publishes it to
+[GitHub Pages](https://phil8-li.github.io/design-layer-landing-page/) on every
+push to `main`. The old address, `phil8-li.github.io/design-layer/`, redirects
+here.
 
 | Path | What |
 | --- | --- |
@@ -16,12 +18,14 @@ build step and no dependencies. `.github/workflows/landing.yml` publishes it to
 | `film/` | Film sources: `story/`, `promo/`, `beat/` and the sound tools |
 | `film/iterations/` | Every rendered cut, rounds 1 to 8, with comparison pages (Git LFS) |
 | `check.mjs`, `serve.mjs`, `tools/` | Checker, local server, asset tools |
+| `test/` | DESIGN.md token check and the get-started commands |
 | `DESIGN.md` | Design rules for the page |
 
 ```sh
-node landing/serve.mjs                 # http://127.0.0.1:4321
-node landing/check.mjs                 # markup, links, budget, then a browser pass
-node landing/check.mjs --only static   # what CI runs; needs no browser
+node serve.mjs                 # http://127.0.0.1:4321
+node check.mjs                 # markup, links, budget, then a browser pass
+node check.mjs --only static   # what CI runs; needs no browser
+npm test                       # also in CI
 ```
 
 The browser pass needs Playwright. It is found on its own when installed
@@ -40,8 +44,8 @@ page renders as text.
 After a recapture, write the two served widths and refresh `demos.json`:
 
 ```sh
-node landing/tools/optimize-shots.mjs            # every demo folder
-node landing/tools/optimize-shots.mjs --only a,b  # some, while another is still being shot
+node tools/optimize-shots.mjs            # every demo folder
+node tools/optimize-shots.mjs --only a,b  # some, while another is still being shot
 ```
 
 With more than one demo folder, `?review` adds a picker and `?demo=<slug>`
@@ -100,9 +104,9 @@ cut `t`) with its Trailer score (`film/promo/sound`, option `trailer`), 36 s wit
 sound. The page's Watch the film dialog plays it. To rebuild it:
 
 ```sh
-node landing/film/promo/render.mjs t --ss 2      # the picture
-python3 landing/film/promo/sound/mix.py t trailer --take 3 --video /tmp/designlayer-film/promo/cut-t.mp4
-node landing/film/promo/publish.mjs t trailer    # launch.mp4, launch-720.mp4 (each < 4 MB), launch-poster.jpg
+node film/promo/render.mjs t --ss 2      # the picture
+python3 film/promo/sound/mix.py t trailer --take 3 --video /tmp/designlayer-film/promo/cut-t.mp4
+node film/promo/publish.mjs t trailer    # launch.mp4, launch-720.mp4 (each < 4 MB), launch-poster.jpg
 ```
 
 `film/render.mjs` is the first film, 50 s and silent. It still writes to
@@ -120,19 +124,27 @@ command each: `npx designlayer` (the start screen, in the browser) or
   the user clicks Open Anyway in System Settings › Privacy & Security.
 - Managed Macs warn on `curl … | bash` and ask for a signed package instead.
 
-A git clone has neither problem. `desktop/mac/package.mjs` still builds
-`Design-Layer-for-Mac.zip` on every deploy for people without git, at
-`https://phil8-li.github.io/design-layer/downloads/Design-Layer-for-Mac.zip`;
-its README.txt explains the Open Anyway step. `desktop/mac/test/desk-cases.mjs`
-checks the page keeps to this.
+A git clone has neither problem, as long as phil8-li/design-layer holds no Git
+LFS files: on a Mac whose `~/.gitconfig` requires LFS but whose Terminal has no
+git-lfs, a clone stops at the first one and leaves a `design-layer` folder with
+no `package.json`. That is why the page, its films and the film archive live
+here. `test/get-started-cases.mjs` checks the page keeps to all of this.
+
+phil8-li/design-layer still builds `Design-Layer-for-Mac.zip` from
+`desktop/mac/package.mjs` on every push to its `main`, for people without git,
+at `https://phil8-li.github.io/design-layer/downloads/Design-Layer-for-Mac.zip`;
+its README.txt explains the Open Anyway step.
 
 ## Icons
 
 `assets/icons.svg` is generated from the editor's own glyphs in
-`src/core/icons.ts`. Add a name to the list in `tools/build-sprite.mjs` and run:
+`src/core/icons.ts` of phil8-li/design-layer. Add a name to the list in
+`tools/build-sprite.mjs` and run it with an installed clone of that repository
+beside this one, or point `DESIGNLAYER_REPO` at one:
 
 ```sh
-node landing/tools/build-sprite.mjs
+node tools/build-sprite.mjs
+DESIGNLAYER_REPO=<path to design-layer> node tools/build-sprite.mjs
 ```
 
 The page is set in [Inter](https://rsms.me/inter/) (SIL Open Font License,
@@ -145,20 +157,9 @@ Direct edit demo retyped in Hedvig Letters Serif (SIL Open Font License,
 `film/iterations/` keeps every cut that was rendered while choosing the launch
 film: the first three options, then rounds 2 to 8, each with an `index.html`
 that plays the options side by side. Open `film/iterations/index.html` through
-`node landing/serve.mjs` to browse them.
+`node serve.mjs` to browse them.
 
-The MP4s and sound spectrograms are stored in Git LFS (`.gitattributes` in this
-folder). Install it once with `brew install git-lfs && git lfs install`, or clone
+The MP4s and sound spectrograms are stored in Git LFS (`.gitattributes` at the
+root). Install it once with `brew install git-lfs && git lfs install`, or clone
 with `GIT_LFS_SKIP_SMUDGE=1` to skip them. They are excluded from `check.mjs`'s
 budget and from the deploy.
-
-## Moving it to its own repo
-
-1. Extract the history: `git subtree split --prefix=landing -b landing-only`,
-   then push that branch to the new repository's `main`.
-2. Copy `.github/workflows/landing.yml` into the new repo. Drop `landing/` from
-   its paths, and replace the Mac download step with a checkout of
-   `phil8-li/design-layer` that runs `node desktop/mac/package.mjs --out downloads`.
-3. Run `git lfs push --all origin` so the iteration files follow.
-4. To rebuild the icon sprite, run
-   `DESIGNLAYER_REPO=<path to designlayer> node tools/build-sprite.mjs`.

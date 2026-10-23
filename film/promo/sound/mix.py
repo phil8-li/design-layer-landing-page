@@ -3,7 +3,7 @@
 the story, and sound effects (sfx.py) laid on the cut's cues (cues.mjs), then mastered
 for the web and muxed onto the rendered film.
 
-  python3 landing/film/promo/sound/mix.py t keynote --take 2 --video /tmp/designlayer-film/promo/cut-t.mp4
+  python3 film/promo/sound/mix.py t keynote --take 2 --video /tmp/designlayer-film/promo/cut-t.mp4
   → ~/.cache/designlayer-site/sound/t/keynote/mix.wav, sfx.wav (the effects alone) and
     /tmp/designlayer-film/promo/cut-t-keynote.mp4
 

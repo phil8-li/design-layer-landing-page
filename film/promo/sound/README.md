@@ -9,14 +9,14 @@ reading with a braam, taiko, and a final slam, is the one picked for the launch 
 (`mix.py t trailer --take 3`). Every effect is synthesized here from noise and tones.
 
 ```sh
-node landing/film/promo/sound/cues.mjs t                     # the picture's events → ~/.cache/designlayer-site/sound/t/cues.json
-MUSIC_API_KEY=… python3 landing/film/promo/sound/bed.py t keynote --take 1    # a music bed (make a few takes)
-python3 landing/film/promo/sound/measure.py t keynote        # rank the takes against the story
-python3 landing/film/promo/sound/measure.py t cinematic 6 --bars 19 37   # a composed take, bar by bar
-python3 landing/film/promo/sound/mix.py t keynote --take 2 --video /tmp/designlayer-film/promo/cut-t.mp4
-python3 landing/film/promo/sound/verify.py t keynote         # effects on cues, beats, sync, loudness
-python3 landing/film/promo/sound/audibility.py t keynote     # each kind of effect against the music
-python3 landing/film/promo/sound/picture.py t keynote out.png  # the mix as a spectrogram, cues marked
+node film/promo/sound/cues.mjs t                     # the picture's events → ~/.cache/designlayer-site/sound/t/cues.json
+MUSIC_API_KEY=… python3 film/promo/sound/bed.py t keynote --take 1    # a music bed (make a few takes)
+python3 film/promo/sound/measure.py t keynote        # rank the takes against the story
+python3 film/promo/sound/measure.py t cinematic 6 --bars 19 37   # a composed take, bar by bar
+python3 film/promo/sound/mix.py t keynote --take 2 --video /tmp/designlayer-film/promo/cut-t.mp4
+python3 film/promo/sound/verify.py t keynote         # effects on cues, beats, sync, loudness
+python3 film/promo/sound/audibility.py t keynote     # each kind of effect against the music
+python3 film/promo/sound/picture.py t keynote out.png  # the mix as a spectrogram, cues marked
 ```
 
 Python 3 with numpy, scipy and pedalboard. `bed.py` reads `MUSIC_API_KEY` and `MUSIC_API_URL`.
