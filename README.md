@@ -14,7 +14,8 @@ here.
 | Path | What |
 | --- | --- |
 | `index.html`, `styles.css`, `main.js`, `backgrounds.js` | The page |
-| `assets/` | Screenshots, fonts, brand, and the published film |
+| `assets/` | Screenshots, stage posters, fonts, brand, and the published film |
+| `stages/` | The feature demos: the stage kit, one module per section, a preview and a filming harness |
 | `film/` | Film sources: `story/`, `promo/`, `beat/` and the sound tools |
 | `film/iterations/` | Every rendered cut, rounds 1 to 8, with comparison pages (Git LFS) |
 | `check.mjs`, `serve.mjs`, `tools/` | Checker, local server, asset tools |
@@ -34,12 +35,13 @@ globally or through `npx`; otherwise point `SITE_PLAYWRIGHT_DIR` at a
 
 ## Screenshots
 
-Every product image is a real capture of Design Layer editing a real open-source
-app, under `assets/shots/<demo>/`. The page shows one demo, `midday`: Midday's
+The hero is a real capture of Design Layer editing a real open-source app,
+under `assets/shots/<demo>/`. The page shows one demo, `midday`: Midday's
 open-source website (AGPL-3.0), renamed "Demo app", with its copy rewritten to
-describe Design Layer. Each demo folder has a `manifest.json` naming the app, its repository and
-license, and what each shot shows, plus the `diff.txt` and `agent.json` the
-page renders as text.
+describe Design Layer. Each demo folder has a `manifest.json` naming the app,
+its repository and license, and what each shot shows. The feature sections
+show these captures too, whole and bare, with the one unit a beat is about
+built in DOM and lifted in place in front of them (see Motion).
 
 After a recapture, write the two served widths and refresh `demos.json`:
 
@@ -49,12 +51,11 @@ node tools/optimize-shots.mjs --only a,b  # some, while another is still being s
 ```
 
 With more than one demo folder, `?review` adds a picker and `?demo=<slug>`
-shows one directly. The scroll scenes animate over the screenshots using the
-`selection`, `focus` and `pins` geometry each manifest records, so a recapture
-must keep those fields. `optimize-shots.mjs` adds what it can find in the
-pixels: the panel seams, the toolbar and the Send to agent button. The film's
-`GEO` and the Pick note's spot (`.pick-note` in styles.css) are measured by
-hand, so re-measure them when a recapture moves the page's content.
+shows one directly. Both affect the hero only: the stages name their captures
+themselves (`stages/<name>.js`).
+`optimize-shots.mjs` adds what the hero needs from the pixels, the panel seams
+and the toolbar's place. The film's `GEO` is measured by hand, so re-measure it
+when a recapture moves the page's content.
 
 ## Motion
 
@@ -63,28 +64,50 @@ hand, so re-measure them when a recapture moves the page's content.
 - **Hero:** three planes (the app, the editor's panels, its toolbar) start
   apart at a gentle angle and follow the pointer; scroll sets them down in turn
   until they line up into the real screenshot, then the mock flies straight
-  into Design like Figma's frame, whose stage is pinned underneath.
+  into Design like Figma's frame, whose stage is pinned underneath. The frame
+  covers the landed mock, then the stage fades up in it and plays its first
+  beat.
 - **Feature sections**, in story order: Design like Figma (Direct edit, Align,
-  Measure, Hide Design Layer), the design system (Libraries, Tokens, Audit; one
-  camera glides from panel to panel across the three), the board, then
-  iterating with an agent. Each tabbed section pins; scroll walks the tabs, and
-  choosing a tab scrolls to it. Nothing is explained in text under a shot: a
-  pointer, click ripples and key pills drawn on the shot (`.cue-*`, one scroll
-  clock `--t`) show each move. The agent section's four tabs (Point, Send,
-  Compare, Pick) share one camera; its terminal carries the MCP setup command
-  and the two recorded handoffs (`agent.json`, `agent-close.json`).
-- **Board:** the live page pulls back into its frame on the board (⇧1), the
-  pointer takes the frame's Live button, and the page flies back in.
+  Measure, Hide Design Layer), the design system (Libraries, Tokens, Audit),
+  the board (Board, then Live), then iterating with an agent (Point, Send,
+  Compare, Pick). Each is a stage (`stages/<name>.js` and `.css`): the real
+  capture of the editor, whole and bare on the page, and the one unit the beat
+  is about (the headline, the inspector's panel, the Changes list) built in
+  DOM at its real size with the capture's real content, lifted in place out
+  of the screenshot so it covers its own source; the gesture (cursor, typing,
+  keys) happens on the lifted unit and the capture behind it swaps to the
+  state that results. One beat per tab. Each section pins; scroll
+  walks the tabs, each tab plays its beat and holds its result, and choosing a
+  tab scrolls to it. The board has no tabs: its scroll walks the opening still,
+  then its two beats. Nothing is explained in text under a frame.
 - **Headings** brighten word by word as they rise. The nav stays out of the
   hero and slides in once Design like Figma pins.
 
-The toolbar over the screenshots is redrawn in HTML from the editor's computed
-styles, in a 1600x1000 layer scaled to the frame, so it stays sharp up close.
-The hero's app plane shows `hero-bare` (the same capture with the toolbar
-hidden, taken by `capture-midday.mjs`), so the only toolbar there is the one
-that lands.
-With `prefers-reduced-motion: reduce`, or without script, nothing is pinned and
-each scene rests in its final frame.
+A stage loads (`import()`, with the kit's `stagekit.css` and
+`look-designlayer.css`) when its section comes within one screen. Until then,
+and without script, the frame shows the stage's poster:
+`assets/shots/stages/<name>-poster.webp`, the rest frame of the stage's
+`meta.poster` beat. To add or change a stage, follow the contract in
+[stages/README.md](stages/README.md) (`meta`, `mount(root)` returning `set`,
+`play`, `pause`, `destroy`), check it in `stages/preview.html?stage=<name>`,
+then add a `.stage[data-stage="<name>"]` root and its poster to a section's
+`.frame-view`. Film a poster at the page's width and convert it as the other
+images are:
+
+```sh
+node stages/film.mjs "http://127.0.0.1:4321/stages/preview.html?stage=<name>&width=1120&beat=<meta.poster>&instant=1" \
+  --select .host --wait 800 --out /tmp/poster-<name>.png
+cwebp -q 74 -m 6 -crop 0 0 2240 1344 /tmp/poster-<name>.png -o assets/shots/stages/<name>-poster.webp
+```
+
+The toolbar over the hero's screenshot is redrawn in HTML from the editor's
+computed styles, in a 1600x1000 layer scaled to the frame, so it stays sharp as
+it lands. The hero's app plane shows `hero-bare` (the same capture with the
+toolbar hidden, taken by `capture-midday.mjs`), so the only toolbar there is
+the one that lands.
+With `prefers-reduced-motion: reduce`, nothing is pinned: each stage rests on
+its first tab's result (the board on its poster beat), and a tab jumps to its
+beat's result with no gesture. Without script, each frame shows its poster.
 
 WebGL backgrounds run outside that loop, each only while it is on screen
 (`backgrounds.js`, ported from React Bits' GradientBlinds, under the license in
@@ -149,8 +172,9 @@ DESIGNLAYER_REPO=<path to design-layer> node tools/build-sprite.mjs
 
 The page is set in [Inter](https://rsms.me/inter/) (SIL Open Font License,
 `assets/fonts/LICENSE-Inter.txt`), with headlines in Instrument Sans and the
-Direct edit demo retyped in Hedvig Letters Serif (SIL Open Font License,
-`assets/fonts/LICENSE-OFL.txt`), all subset to Latin.
+demo app's headline in the stages set in Hedvig Letters Serif (SIL Open Font
+License, `assets/fonts/LICENSE-OFL.txt`, loaded by the stage sheets), all
+subset to Latin.
 
 ## Film iterations
 

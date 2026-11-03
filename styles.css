@@ -16,13 +16,6 @@
   font-display: swap;
 }
 
-/* Direct edit's live retype. Block: a fallback would wrap differently. */
-@font-face {
-  font-family: "Hedvig Letters Serif";
-  src: url("assets/fonts/HedvigLettersSerif-latin.woff2") format("woff2");
-  font-display: block;
-}
-
 :root {
   color-scheme: dark;
 
@@ -519,7 +512,7 @@ kbd {
 }
 
 .js #edit .tabs-track {
-  height: calc(160vh + var(--tabs, 2) * 55vh);
+  height: calc(160vh + var(--tabs, 2) * var(--stretch));
 }
 
 .js #edit .tabs-track.is-waiting .tabs-stage {
@@ -958,80 +951,6 @@ button.token:active {
   transform: none;
 }
 
-/* Where a note lands: ripples drawn around the pin in the screenshot, never
-   over it, so each pin keeps its own number and shape (a note is round, an
-   edit is square). */
-.pin {
-  position: absolute;
-  width: 22px;
-  height: 22px;
-  margin: -11px 0 0 -11px;
-  pointer-events: none;
-}
-
-.pin::before,
-.pin::after {
-  content: "";
-  position: absolute;
-  inset: -3px;
-  border: 2px solid #90a3ff;
-  border-radius: 50%;
-}
-
-.pin::before {
-  opacity: var(--ring, 0);
-  transform: scale(calc(1 + (1 - var(--ring, 0)) * 1.8));
-}
-
-.pin::after {
-  opacity: calc(var(--ring2, 0) * 0.6);
-  transform: scale(calc(1 + (1 - var(--ring2, 0)) * 2.6));
-}
-
-.send-ring,
-.option-ring {
-  position: absolute;
-  border-radius: 10px;
-  box-shadow: 0 0 0 2px #90a3ff, 0 0 28px 4px rgb(121 140 255 / 0.65);
-  opacity: var(--o, 0);
-  transform: scale(var(--s, 1));
-}
-
-/* Pick: a note on the option to keep, drawn as the editor draws one. */
-.pick-note {
-  position: absolute;
-  left: 560px;
-  top: 700px;
-  opacity: var(--o, 0);
-  transform: translateY(calc((1 - var(--o, 0)) * 8px));
-}
-
-.pick-note::before {
-  content: "";
-  position: absolute;
-  inset: -12px auto auto -12px;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: var(--accent-fill);
-  box-shadow: 0 0 0 2px #fff, 0 6px 16px -4px rgb(0 0 0 / 0.5);
-}
-
-.pick-bubble {
-  position: absolute;
-  left: 22px;
-  top: -8px;
-  width: 300px;
-  margin: 0;
-  padding: 12px 14px;
-  border: 1px solid rgb(255 255 255 / 0.12);
-  border-radius: 12px;
-  background: #181818;
-  box-shadow: 0 18px 40px -12px rgb(0 0 0 / 0.7);
-  color: #fafafa;
-  font: 500 15px/1.45 var(--font);
-}
-
 /* ---------- Frames around real screenshots ---------- */
 
 .frame {
@@ -1102,6 +1021,51 @@ button.token:active {
   inset: 0;
 }
 
+/* ---------- Stages: the feature demos (stages/, main.js setupStages) ----------
+   A stage fills its frame's width and sets its own height (the kit puts an
+   aspect-ratio on the root). Its poster, the payoff frame as an image, sits in
+   the same cell and shows until the stage has mounted, and always without
+   script. The ground is the stage page's near-black, so the bled window's
+   edge reads against it as it does in the stage's own preview. */
+.frame-view:has(> .stage) {
+  display: grid;
+  align-items: center;
+  aspect-ratio: auto;
+  background: none;
+}
+
+/* A stage has no container: the capture sits bare on the page, with the
+   shot's own corners, no rim, no inset, no fill (Phil, 2026-11-02). */
+.frame:has(> .frame-view > .stage) {
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  border-radius: var(--radius-shot);
+}
+.frame:has(> .frame-view > .stage) > .frame-view {
+  border-radius: var(--radius-shot);
+}
+
+.frame-view > .stage,
+.frame-view > .stage-poster {
+  grid-area: 1 / 1;
+  display: block;
+  width: 100%;
+}
+
+.frame-view > .stage-poster {
+  height: auto;
+}
+
+.frame-view > .stage-poster[hidden] {
+  display: none;
+}
+
+/* The hero's mock (1600x1000) lands in Design like Figma's frame; the edit
+   stage is designed at 1000x625, the same 1.6, so the frame needs no
+   letterbox and the mock lands on the stage's exact rect. */
+
 /* The camera: scroll pushes in and pans across this layer, never the frame. */
 .frame-zoom {
   position: absolute;
@@ -1117,25 +1081,6 @@ button.token:active {
   width: 100%;
   height: 100%;
   object-fit: cover;
-}
-
-/* Every screenshot set stacks its shots and crossfades between them. */
-.shot {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  opacity: 0;
-  transform: scale(1.012);
-  transition:
-    opacity 480ms ease,
-    transform 800ms var(--ease-out);
-}
-
-.shot.is-active {
-  opacity: 1;
-  transform: none;
 }
 
 /* The editor, cut into the three columns it really has: the left panel, the
@@ -1282,6 +1227,7 @@ h2 {
   margin-inline: auto;
 }
 
+
 /* On a phone the control spans the frame under it and the tabs share it
    equally, so the row lines up with the shot. Five or more tabs don't fit:
    they stay on one row that scrolls sideways, and main.js slides it along
@@ -1323,81 +1269,7 @@ h2 {
   }
 }
 
-/* ---------- Terminal ---------- */
-
-.terminal {
-  overflow: hidden;
-  border: 1px solid var(--line-strong);
-  border-radius: var(--radius-frame);
-  background: #0d0d0d;
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.06),
-    0 24px 80px -24px rgb(0 0 0 / 0.7);
-}
-
-.terminal-bar {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-height: 44px;
-  padding: 0 6px 0 16px;
-  border-bottom: 1px solid var(--line);
-  color: var(--text-3);
-  font-size: 13px;
-}
-
-.terminal-body {
-  overflow: auto;
-  padding: 14px 0;
-  color: var(--text-2);
-  font: 12.5px/1.75 var(--mono);
-  tab-size: 2;
-  scrollbar-color: rgb(255 255 255 / 0.18) transparent;
-  scrollbar-width: thin;
-}
-
-.terminal-body code {
-  display: block;
-  min-width: max-content;
-}
-
-.terminal-body code[hidden] {
-  display: none;
-}
-
-.terminal-body {
-  padding-inline: 18px;
-  white-space: pre;
-}
-
-.t-dim {
-  color: var(--text-3);
-}
-
-.t-key {
-  color: var(--accent-text);
-}
-
-.t-str {
-  color: #e6c07b;
-}
-
-.t-ok {
-  color: var(--add);
-}
-
-.terminal {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.terminal-dots {
-  display: inline-flex;
-  gap: 6px;
-}
-
-.terminal-bar .copy {
+.copy {
   margin-left: auto;
 }
 
@@ -1719,6 +1591,7 @@ h2 {
   font-size: 14px;
   text-align: center;
 }
+
 
 @media (max-width: 860px) {
   .paths {
@@ -2060,9 +1933,14 @@ html:not(.js) .switcher-pill {
 /* Pinned tabs: the track is tall and the stage sticks; each tab owns an equal
    stretch of the scroll. Without script or with reduced motion, the stage
    sits in the page and the tabs are plain tabs. */
+/* One stretch of pinned scroll per beat (--stretch): a beat's gesture plays
+   on entry and holds for the rest of it, so a stretch is long enough that a
+   quick scroll still passes through the gesture. A key beat takes more than
+   one stretch (data-weights on the tablist). */
 .js .tabs-track {
+  --stretch: 130vh;
   position: relative;
-  height: calc(100vh + var(--tabs, 2) * 55vh);
+  height: calc(100vh + var(--tabs, 2) * var(--stretch));
 }
 
 .js .tabs-stage {
@@ -2084,415 +1962,6 @@ html:not(.js) .switcher-pill {
 
 .js .section-pinned {
   padding-top: calc(var(--section) - 15vh);
-}
-
-.cursor {
-  display: inline-block;
-  width: 0.55em;
-  height: 1.1em;
-  margin-left: 2px;
-  background: var(--text);
-  vertical-align: -0.2em;
-  animation: blink 1s steps(1) 4;
-}
-
-@keyframes blink {
-  50% {
-    opacity: 0;
-  }
-}
-
-/* ---------- Cues: pointer, clicks and keys drawn on a shot ----------
-   One clock, --t (0 to 1 over the shot's scroll, from main.js; else data-rest
-   or 1), plays them. Moments: --a in, --z out, --c click, --d travel, --swap. */
-.frame-view {
-  --t: 1;
-}
-
-/* --s is the design-system camera's zoom; cues keep their size through it. */
-.shot-space {
-  --cue: calc(max(1, calc(0.55 / var(--k, 0.75))) / var(--s, 1));
-}
-
-div.shot > img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.cue-ring {
-  position: absolute;
-  border-radius: 8px;
-  box-shadow: 0 0 0 calc(2px / var(--s, 1)) #90a3ff, 0 0 calc(24px / var(--s, 1)) rgb(121 140 255 / 0.55);
-  opacity: clamp(0, (var(--t) - var(--a)) * 10, 1);
-}
-
-.cue-type {
-  position: absolute;
-  left: var(--x);
-  top: var(--y);
-  padding: 0 3px;
-  background: #252525;
-  color: #ededed;
-  font: 12.5px/19px var(--mono);
-  white-space: nowrap;
-  clip-path: inset(0 calc((1 - clamp(0, (var(--t) - var(--a)) / 0.14, 1)) * 100%) 0 0);
-}
-
-.cue-after {
-  opacity: clamp(0, (var(--t) - var(--swap, 0.5)) * 400, 1);
-}
-
-/* Direct edit, typed live (main.js) in the app's own face and metrics, so it
-   rewraps as the app did; the shot under it swaps on the rewrap (--swap). */
-.te {
-  position: absolute;
-  left: 416px;
-  top: 246px;
-  width: 768px;
-  background: #faf8f4; /* the demo app's paper, sampled from the shot */
-  box-shadow: 0 0 0 14px #faf8f4;
-  color: #121212;
-  font: 400 60px/60px "Hedvig Letters Serif", serif;
-  letter-spacing: -1.5px;
-  text-align: center;
-  text-wrap: balance;
-  opacity: calc(clamp(0, (var(--t) - 0.3) * 400, 1) * clamp(0, (0.76 - var(--t)) * 400, 1));
-}
-
-/* The editor's text-edit outline, measured on the capture. */
-.te-span {
-  outline: 2px solid #8a72ee;
-}
-
-.te .is-sel {
-  background: rgb(121 140 255 / 0.32);
-}
-
-.te-caret {
-  display: inline-block;
-  width: 2px;
-  height: 54px;
-  margin: 0 -1px;
-  vertical-align: -10px;
-  background: #121212;
-  animation: caret 1s steps(1) infinite;
-}
-
-.is-sel + .te-caret {
-  visibility: hidden;
-}
-
-@keyframes caret {
-  50% {
-    opacity: 0;
-  }
-}
-
-.cue-hand,
-.cue-key,
-.cue-ripple,
-.cue-pulse {
-  position: absolute;
-  left: var(--x);
-  top: var(--y);
-}
-
-.cue-hand {
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-1 -1 22 28'%3E%3Cpath d='M2.5 2v18.2l4.6-4.3 2.9 6.8 3.3-1.4-2.9-6.7H16.6Z' fill='%230b0b0c' stroke='%23fff' stroke-width='1.4' stroke-linejoin='round'/%3E%3C/svg%3E") 0 0 / 100% 100% no-repeat;
-  --go: clamp(0, (var(--t) - var(--a, 0)) / var(--d, 0.14), 1);
-  --ease: calc(var(--go) * var(--go) * (3 - 2 * var(--go)));
-  width: 26px;
-  height: 34px;
-  margin: -2.6px 0 0 -3.25px; /* the arrow's tip is the point */
-  opacity: min(clamp(0, (var(--t) - var(--a, 0)) * 14, 1), clamp(0, (var(--z, 2) - var(--t)) * 14, 1));
-  translate: calc((var(--fx) - var(--x)) * (1 - var(--ease))) calc((var(--fy) - var(--y)) * (1 - var(--ease)));
-  scale: var(--cue);
-  transform-origin: 12.5% 7.7%;
-  filter: drop-shadow(0 2px 3px rgb(0 0 0 / 0.4));
-}
-
-.cue-ripple {
-  --r: clamp(0, (var(--t) - var(--c)) * 9, 1);
-  width: 44px;
-  height: 44px;
-  margin: -22px 0 0 -22px;
-  border: 3px solid #798cff;
-  border-radius: 50%;
-  opacity: calc((1 - var(--r)) * clamp(0, (var(--t) - var(--c)) * 400, 1) * 0.85);
-  scale: calc((0.35 + var(--r) * 1.1) * var(--cue));
-}
-
-.cue-pulse {
-  --r: clamp(0, (var(--t) - var(--c)) * 7, 1);
-  width: 52px;
-  height: 52px;
-  margin: -26px 0 0 -26px;
-  border: 3px solid #90a3ff;
-  border-radius: 50%;
-  opacity: calc((1 - var(--r)) * clamp(0, (var(--t) - var(--c)) * 400, 1));
-  scale: calc(1 + var(--r) * 0.9);
-}
-
-/* A key or gesture where it happens, in the editor's own hint pill. */
-.cue-key {
-  --in: clamp(0, (var(--t) - var(--a, 0)) * 10, 1);
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  height: 40px;
-  padding: 0 14px;
-  border: 1.5px solid rgb(255 255 255 / 0.14);
-  border-radius: 13px;
-  background: rgb(23 23 23 / 0.94);
-  box-shadow: 0 12px 32px rgb(0 0 0 / 0.38), inset 0 1px 0 rgb(255 255 255 / 0.08);
-  color: #e5e5e5;
-  font: 500 18px/1 var(--font);
-  white-space: nowrap;
-  opacity: min(var(--in), clamp(0, (var(--z, 2) - var(--t)) * 10, 1));
-  translate: 0 calc((1 - var(--in)) * 8px);
-  scale: var(--cue);
-  transform-origin: 0 0;
-}
-
-.cue-key kbd {
-  display: grid;
-  place-items: center;
-  min-width: 28px;
-  height: 28px;
-  padding: 0 6px;
-  border: 0;
-  border-radius: 7px;
-  background: #333;
-  box-shadow: inset 0 -1.5px 0 rgb(0 0 0 / 0.5), inset 0 1.5px 0 rgb(255 255 255 / 0.1);
-  color: #fafafa;
-  font: 600 16px/1 var(--font);
-}
-
-.cue-key kbd:first-child {
-  margin-left: -8px;
-}
-
-.cue-key kbd + kbd {
-  margin-left: -5px;
-}
-
-.cue-key-center {
-  translate: -50% calc((1 - var(--in)) * 8px);
-  transform-origin: 50% 0;
-}
-
-.cue-tag {
-  border-color: rgb(144 163 255 / 0.5);
-  color: #fff;
-}
-
-.cue-tag .icon {
-  color: var(--accent-text);
-}
-
-/* Hide tab: the panels slide to their edges, leaving the round button, and
-   return; main.js scrubs --out. At rest it is the hidden editor. */
-.shot-collapse {
-  --out: 1;
-}
-
-.shot-collapse .strip-left {
-  transform: translateX(calc(var(--seam-l) * -100% * var(--out)));
-}
-
-.shot-collapse .strip-right {
-  transform: translateX(calc((1 - var(--seam-r)) * 100% * var(--out)));
-}
-
-/* The two layouts trade places in sequence: the outgoing one dips first. */
-.shot-collapse > img {
-  opacity: clamp(0, calc(var(--out) * 3 - 1.2), 1);
-}
-
-.shot-collapse .strip-center {
-  opacity: clamp(0, calc(1.8 - var(--out) * 3), 1);
-}
-
-/* Canvas: a pinned pull-back from the live page to the whole board. */
-.canvas-track {
-  position: relative;
-  height: 240vh;
-}
-
-.canvas-stage {
-  --film-w: min(var(--wrap), calc(100vw - 2 * var(--gutter)), calc((100svh - 230px) * 1.6 + 12px));
-  position: sticky;
-  top: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: var(--head-gap);
-  height: 100vh;
-  height: 100svh;
-  padding-top: 64px;
-  overflow: hidden;
-}
-
-.canvas-film {
-  width: var(--film-w);
-  margin: 0 auto;
-}
-
-.canvas-live,
-.canvas-page {
-  opacity: 0;
-}
-
-/* The board's Live button (src/core/css/board.ts). */
-.live-badge {
-  position: absolute;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  height: 24px;
-  padding: 0 9px 0 7px;
-  border-radius: 12px;
-  background: rgb(18 22 26 / 0.6);
-  color: #fff;
-  font: 500 12px/1 var(--font);
-  opacity: var(--o, 1);
-  translate: -100% 0;
-  scale: calc(var(--cue) * 1.3);
-  transform-origin: 100% 0;
-}
-
-.live-badge svg {
-  fill: currentColor;
-}
-
-.board-hover {
-  position: absolute;
-  border-radius: 4px;
-  box-shadow: 0 0 0 2px var(--accent);
-  opacity: var(--o, 1);
-}
-
-/* ---------- Comment: a pinned story in four beats ----------
-   The beats are tabs, like every other tabbed section. Without script (and
-   with reduced motion) the stage sits in the page and the tabs switch the
-   shot. With script the stage sticks and scroll walks the tabs: the toolbar
-   switches to Notes, pins drop, Send to agent lights up, and the agent's
-   brief streams in. */
-.comment-stage {
-  display: grid;
-}
-
-.comment-film {
-  position: relative;
-  width: var(--visual);
-  margin: 0 auto;
-}
-
-.comment-stage .shot[data-beat="1"] {
-  opacity: 1;
-  transform: none;
-}
-
-.terminal-float {
-  margin-top: 20px;
-}
-
-.terminal-float .terminal-body {
-  min-height: 0;
-  max-height: 360px;
-}
-
-.js .comment-track {
-  position: relative;
-  height: 420vh;
-}
-
-.js .comment-stage {
-  --film-w: min(var(--wrap), calc(100vw - 2 * var(--gutter)), calc((100svh - 310px) * 1.6 + 12px));
-  position: sticky;
-  top: 0;
-  align-content: center;
-  height: 100vh;
-  height: 100svh;
-  padding-top: 64px;
-  overflow: hidden;
-}
-
-.js .comment-film {
-  width: var(--film-w);
-}
-
-.js .comment-stage .shot[data-beat="1"] {
-  opacity: 0;
-}
-
-.js .comment-stage .shot.is-active {
-  opacity: 1;
-}
-
-.js .terminal-float {
-  position: absolute;
-  right: -3%;
-  bottom: -5%;
-  z-index: 3;
-  width: min(460px, 44%);
-  height: 74%;
-  margin: 0;
-  opacity: 0;
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.06),
-    0 40px 120px -20px rgb(0 0 0 / 0.95),
-    0 0 0 1px rgb(0 0 0 / 0.6);
-  -webkit-backdrop-filter: blur(16px) saturate(1.4);
-  backdrop-filter: blur(16px) saturate(1.4);
-  background: rgb(13 13 13 / 0.9);
-  will-change: transform, opacity;
-}
-
-.js .terminal-float .terminal-body {
-  flex: 1;
-  max-height: none;
-  overflow: hidden;
-}
-
-.js .terminal-float code {
-  will-change: transform;
-}
-
-.js .terminal-float .tl {
-  opacity: clamp(0, calc(var(--reveal, 999) - var(--i)), 1);
-}
-
-@media (max-width: 760px) {
-  .js .comment-track {
-    height: 340vh;
-  }
-
-  .js .terminal-float {
-    left: 4%;
-    right: 4%;
-    top: 6%;
-    bottom: 6%;
-    width: auto;
-    height: auto;
-  }
-}
-
-/* A phone fits the agent's longest line without clipping it. */
-@media (max-width: 420px) {
-  .js .terminal-float .terminal-body {
-    padding-inline: 12px;
-    font-size: 11px;
-  }
-}
-
-@media (max-width: 360px) {
-  .js .terminal-float .terminal-body {
-    font-size: 10px;
-  }
 }
 
 /* The film. */
@@ -2926,13 +2395,11 @@ html:not(.js) .tweak {
    The scenes are laid out for main.js to play. Without it, they rest in
    their final frame, stacked like the rest of the page. */
 
-html:not(.js) .hero-track,
-html:not(.js) .canvas-track {
+html:not(.js) .hero-track {
   height: auto;
 }
 
-html:not(.js) .hero-stage,
-html:not(.js) .canvas-stage {
+html:not(.js) .hero-stage {
   position: relative;
   height: auto;
   overflow: visible;
@@ -2949,14 +2416,6 @@ html:not(.js) .hero-film {
   top: auto;
   left: auto;
   margin: clamp(48px, 7vw, 72px) auto 0;
-}
-
-html:not(.js) .canvas-live {
-  display: none;
-}
-
-html:not(.js) .canvas-stage {
-  padding-top: 0;
 }
 
 /* A phone on its side: little height, so the heading, tabs and gaps shrink
@@ -2976,22 +2435,12 @@ html:not(.js) .canvas-stage {
     font-size: 13px;
   }
 
-  .js .tabs-stage,
-  .js .comment-stage,
-  .canvas-stage {
+  .js .tabs-stage {
     padding-top: 56px;
   }
 
   .js .tabs-stage {
     --film-w: min(var(--wrap), calc(100vw - 2 * var(--gutter)), calc((100svh - 170px) * 1.6 + 12px));
-  }
-
-  .js .comment-stage {
-    --film-w: min(var(--wrap), calc(100vw - 2 * var(--gutter)), calc((100svh - 170px) * 1.6 + 12px));
-  }
-
-  .canvas-stage {
-    --film-w: min(var(--wrap), calc(100vw - 2 * var(--gutter)), calc((100svh - 130px) * 1.6 + 12px));
   }
 }
 
@@ -3014,13 +2463,11 @@ html:not(.js) .canvas-stage {
     transition-delay: 0ms !important;
   }
 
-  .hero-track,
-  .canvas-track {
+  .hero-track {
     height: auto;
   }
 
-  .hero-stage,
-  .canvas-stage {
+  .hero-stage {
     position: relative;
     height: auto;
     overflow: visible;
@@ -3037,10 +2484,6 @@ html:not(.js) .canvas-stage {
     top: auto;
     left: auto;
     margin: clamp(48px, 7vw, 72px) auto 0;
-  }
-
-  .canvas-stage {
-    padding-top: 0;
   }
 
   .js .section-pinned {
@@ -3081,47 +2524,5 @@ html:not(.js) .canvas-stage {
   .stack,
   .plane {
     transform: none !important;
-  }
-
-  .shot {
-    transform: none;
-  }
-
-  .canvas-live {
-    display: none;
-  }
-
-  .js .comment-track {
-    height: auto;
-  }
-
-  .js .comment-stage {
-    position: relative;
-    height: auto;
-    padding-top: 0;
-    overflow: visible;
-  }
-
-  .js .comment-film {
-    width: var(--visual);
-  }
-
-  .js .terminal-float {
-    position: relative;
-    inset: auto;
-    width: auto;
-    height: auto;
-    margin-top: 20px;
-    opacity: 1;
-    transform: none;
-  }
-
-  .js .terminal-float .terminal-body {
-    max-height: 360px;
-    overflow: auto;
-  }
-
-  .js .terminal-float .tl {
-    opacity: 1;
   }
 }

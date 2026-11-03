@@ -35,10 +35,12 @@ jobs:
       # DESIGN.md tokens against styles.css, and the get-started commands.
       - run: npm test
 
-      # Publish only what the page loads, not the tools that build and check it.
-      # The leading slash anchors each pattern to the repository root, so `/film`
-      # (the film's sources and iterations) does not also drop assets/film/.
-      - run: rsync -a --exclude /.git --exclude /.github --exclude /tools --exclude /film --exclude /test --exclude /check.mjs --exclude /serve.mjs --exclude /README.md --exclude /AGENTS.md --exclude /DESIGN.md --exclude /package.json --exclude /.check --exclude .gitignore --exclude .gitattributes ./ "$RUNNER_TEMP/site/"
+      # Publish only what the page loads, not the tools that build and check it
+      # (the stage kit's preview, specimen, smoke stage, filming script and notes
+      # stay out; the stage modules, looks and LICENSES.md ship). The leading slash
+      # anchors each pattern to the repository root, so `/film` (the film's sources
+      # and iterations) does not also drop assets/film/.
+      - run: rsync -a --exclude /.git --exclude /.github --exclude /tools --exclude /film --exclude /test --exclude /check.mjs --exclude /serve.mjs --exclude /README.md --exclude /AGENTS.md --exclude /DESIGN.md --exclude /package.json --exclude /.check --exclude /stages/preview.html --exclude /stages/specimen.html --exclude /stages/demo-smoke.js --exclude /stages/film.mjs --exclude /stages/README.md --exclude .gitignore --exclude .gitattributes ./ "$RUNNER_TEMP/site/"
 
       - uses: actions/upload-pages-artifact@v5
         if: github.event_name != 'pull_request'

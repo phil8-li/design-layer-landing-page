@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>stagekit specimen</title>
+<link rel="stylesheet" href="./stagekit.css">
+<link rel="stylesheet" href="./look-designlayer.css">
+<link rel="stylesheet" href="./look-appbuilder.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block">
+<style>
+  body { margin: 0; padding: 24px; font: 12px/1.4 -apple-system, BlinkMacSystemFont, system-ui, sans-serif; background: #8a8a8a; color: #111; }
+  .looks { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 24px; max-width: 1392px; margin: 0 auto; }
+  /* Each look is a 1:1 sheet (no scaling): a plain .sk-stage box, not createStage. */
+  .sheet.sk-stage { overflow: visible; padding: 24px; border-radius: 16px; background: var(--sk-canvas); }
+  .look-name { margin-bottom: 16px; color: var(--sk-text-strong); font-size: 13px; font-weight: 600; }
+  .grid { display: flex; flex-wrap: wrap; gap: 20px 24px; align-items: flex-start; }
+  .part { display: flex; flex-direction: column; gap: 8px; }
+  .label { color: var(--sk-text-faint); font-size: 11px; }
+  .line { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .winbox { position: relative; width: 100%; height: 300px; margin-bottom: 28px; }
+  .winbox .sk-window { left: 0; top: 0; width: 100%; max-width: 560px; height: 280px; }
+  .winbox .sk-satellite { right: max(0px, calc(100% - 560px - 70px)); bottom: -8px; width: 168px; padding: 12px; }
+  .side .sk-list { padding: 8px; }
+  .content-head { padding: 12px 16px 8px; color: var(--sk-text-strong); font-weight: 600; }
+  .content .sk-list { padding: 0 4px; }
+  .sat-row { display: flex; align-items: center; gap: 8px; color: var(--sk-text-strong); }
+  .cursor-box { position: relative; width: 56px; height: 44px; border-radius: 8px; background: var(--sk-surface); box-shadow: inset 0 0 0 1px var(--sk-line-faint); }
+  .cursor-box .sk-cursor { transform: translate3d(20px, 12px, 0); }
+  .cursor-box.ib .sk-cursor { transform: translate3d(28px, 22px, 0); }
+  .fade-demo { width: 150px; height: 84px; padding: 10px; border-radius: 8px; background: var(--sk-surface); box-shadow: inset 0 0 0 1px var(--sk-line-faint); }
+  .leader-box { position: relative; width: 150px; height: 40px; }
+  .leader-box .sk-leader { left: 8px; top: 20px; --len: 110px; }
+  .leader-box .tag { position: absolute; left: 0; top: 0; color: var(--sk-text-faint); }
+  .real-ui { margin-top: 8px; border-radius: 12px; }
+  .shadow-tile { width: 72px; height: 48px; border-radius: var(--sk-radius-lg); background: var(--sk-raised); }
+  @media (max-width: 500px) { body { padding: 12px; } .sheet.sk-stage { padding: 16px; } }
+</style>
+</head>
+<body>
+<div class="looks" id="looks"></div>
+<script type="module">
+  import { windowChrome, bar, bars, keycaps, createCursor, typeInto, createStage, browserWindow, BWIN_CHROME, shots, wash, lift, fitRect } from "./stagekit.js"
+
+  const SPRITE = new URL("../assets/icons.svg", import.meta.url).href
+  const SHOT = new URL("../assets/shots/midday/hero-2400.webp", import.meta.url).href
+  const LOOKS = [
+    { cls: "look-designlayer", theme: "dark", name: "Design Layer (dark)", url: "localhost:3000", icons: ["i-Eye", "i-Lock", "i-Component", "i-Type"], rows: ["Header", "Pricing"] },
+    { cls: "look-appbuilder", theme: "light", name: "App builder (Luminous light)", url: "hub-pulse.run.app", icons: ["dashboard", "folder", "settings", "chat"], rows: ["Hub pulse", "Driver live assist"] },
+  ]
+
+  const h = (tag, cls, text) => {
+    const n = document.createElement(tag)
+    if (cls) n.className = cls
+    if (text != null) n.textContent = text
+    return n
+  }
+  function icon(look, id) {
+    if (look.cls === "look-appbuilder") return h("span", "sk-icon material-symbols-rounded", id)
+    const ns = "http://www.w3.org/2000/svg"
+    const svg = document.createElementNS(ns, "svg")
+    svg.setAttribute("class", "sk-icon")
+    svg.setAttribute("aria-hidden", "true")
+    const use = document.createElementNS(ns, "use")
+    use.setAttribute("href", `${SPRITE}#${id}`)
+    svg.append(use)
+    return svg
+  }
+  function part(label, ...children) {
+    const p = h("div", "part")
+    p.append(h("div", "label", label), ...children)
+    return p
+  }
+  function line(...children) {
+    const l = h("div", "line")
+    l.append(...children)
+    return l
+  }
+  function row(look, { title, iconId, trail, w, selected, hover, dense }) {
+    const r = h("div", `sk-row${dense ? " dense" : ""}`)
+    if (iconId) { const lead = h("div", "sk-row-lead"); lead.append(icon(look, iconId)); r.append(lead) }
+    const main = h("div", "sk-row-main")
+    main.append(title ? h("div", "sk-row-title", title) : bar(`${w}%`, { ink: 2 }))
+    r.append(main)
+    if (trail) { const t = h("div", "sk-row-trail"); t.append(trail); r.append(t) }
+    if (selected) r.setAttribute("data-selected", "")
+    if (hover) r.setAttribute("data-hover", "")
+    return r
+  }
+
+  for (const look of LOOKS) {
+    const sheet = h("div", `sheet sk-stage ${look.cls}`)
+    sheet.dataset.theme = look.theme
+    sheet.append(h("div", "look-name", look.name))
+
+    // Window with sidebar, 6 rows (2 real, 4 bars), and a satellite on its edge.
+    const winbox = h("div", "winbox")
+    const win = windowChrome({ title: "Layers", sidebar: 150 })
+    win.classList.add("sk-hero")
+    const sideList = h("div", "sk-list")
+    for (const w of [72, 54, 66, 48]) sideList.append(row(look, { w, dense: true }))
+    win.side.classList.add("side")
+    win.side.append(sideList)
+    const content = h("div", "content")
+    const list = h("div", "sk-list")
+    list.append(
+      row(look, { title: look.rows[0], iconId: look.icons[0], selected: true, trail: h("span", "sk-badge", "Edited") }),
+      row(look, { title: look.rows[1], iconId: look.icons[1], hover: true }),
+      row(look, { w: 58, iconId: look.icons[2] }),
+      row(look, { w: 44, iconId: look.icons[3] }),
+      row(look, { w: 66, iconId: look.icons[2] }),
+      row(look, { w: 50, iconId: look.icons[3] }),
+    )
+    content.append(list)
+    win.body.append(content)
+    const sat = h("div", "sk-satellite")
+    const satRow = h("div", "sat-row")
+    const av = h("span", "sk-avatar", "M")
+    av.style.setProperty("--c", "#7a6ad8")
+    satRow.append(av, h("span", "", "Maya"), h("span", "sk-badge", "Comment"))
+    sat.append(satRow)
+    winbox.append(win, sat)
+    sheet.append(part("window + sidebar + satellite (6 rows: 2 real, 4 bars)"), winbox)
+
+    const grid = h("div", "grid")
+    const browser = windowChrome({ url: look.url })
+    browser.style.cssText = "position: relative; width: 300px; height: 96px;"
+    browser.body.append(Object.assign(bars([60, 45, 70]), { style: "padding: 12px 12px 0" }))
+    grid.append(part("window with URL pill", browser))
+
+    // Field: rest, focused with typed text and caret.
+    const f1 = h("div", "sk-field")
+    f1.style.width = "220px"
+    f1.append(icon(look, look.cls === "look-appbuilder" ? "search" : "i-Search"))
+    const t1 = h("span", "sk-field-text")
+    t1.dataset.placeholder = "Filter layers"
+    f1.append(t1)
+    const f2 = h("div", "sk-field")
+    f2.style.width = "220px"
+    f2.setAttribute("data-focus", "")
+    const t2 = h("span", "sk-field-text")
+    f2.append(t2)
+    typeInto(t2, "Pricing", { cps: 1000, keepCaret: true })
+    grid.append(part("field: rest, focus + caret", f1, f2))
+
+    const press = (n) => { n.setAttribute("data-press", ""); return n }
+    grid.append(part("buttons: rest / data-press",
+      line(h("button", "sk-btn primary", "Publish"), h("button", "sk-btn secondary", "Cancel"), h("button", "sk-btn ghost", "More")),
+      line(press(h("button", "sk-btn primary", "Publish")), press(h("button", "sk-btn secondary", "Cancel")), press(h("button", "sk-btn ghost", "More")))))
+
+    const menu = h("div", "sk-menu")
+    const mi = (t, hint, hover) => {
+      const m = h("div", "sk-menu-item", t)
+      if (hint) m.append(h("span", "sk-menu-hint", hint))
+      if (hover) m.setAttribute("data-hover", "")
+      return m
+    }
+    menu.append(mi("Duplicate", "⌘D"), mi("Hide", "⇧⌘H", true), h("div", "sk-menu-sep"), mi("Delete", "⌫"))
+    grid.append(part("menu", menu))
+
+    const on = h("span", "sk-toggle"); on.setAttribute("data-on", "")
+    grid.append(part("toggle", line(h("span", "sk-toggle"), on)))
+
+    const tabs = h("div", "sk-tabs")
+    const tab = (t, sel) => { const n = h("div", "sk-tab", t); if (sel) n.setAttribute("data-selected", ""); return n }
+    tabs.append(tab("Design", true), tab("Changes"), tab("Design system"))
+    grid.append(part("tabs", tabs))
+
+    const badge = (t, tone) => { const b = h("span", "sk-badge", t); if (tone) b.dataset.tone = tone; return b }
+    grid.append(part("badges", line(badge("Edited"), badge("Live", "success"), badge("2 issues", "warning"), badge("Failed", "danger"), badge("Draft", "neutral"))))
+    grid.append(part("chip", line(h("span", "sk-chip", "Desktop"), h("span", "sk-chip", "Mobile"))))
+
+    const avatars = line()
+    for (const [size, t, c] of [["sm", "A", "#d0743c"], ["", "M", "#7a6ad8"], ["lg", "J", "#3a9a6a"], ["", "", ""], ["sm", "", ""]]) {
+      const a = h("span", `sk-avatar ${size}`, t)
+      if (c) a.style.setProperty("--c", c)
+      avatars.append(a)
+    }
+    grid.append(part("avatars: named 20/24/28, filler gray", avatars))
+
+    const keys = line()
+    keys.append(keycaps(["⌘", "."]))
+    const keys2 = line()
+    keys2.append(keycaps(["⇧", "⌘", "K"]))
+    grid.append(part("keycaps", keys, keys2))
+
+    const cursors = line()
+    for (const kind of ["arrow", "hand", "ibeam"]) {
+      const box = h("div", `cursor-box${kind === "ibeam" ? " ib" : ""}`)
+      const c = createCursor(box, { kind })
+      c.show()
+      c.el.style.transition = "none"
+      cursors.append(box)
+    }
+    grid.append(part("cursor: arrow / hand / ibeam", cursors))
+
+    const fb = h("div", "fade-demo sk-fade-b")
+    fb.style.setProperty("--sk-fade", "40px")
+    fb.append(bars([80, 60, 74, 52, 66]))
+    const fr = h("div", "fade-demo sk-fade-r")
+    fr.append(bars([100, 100, 100]))
+    grid.append(part("fades: .sk-fade-b / .sk-fade-r", line(fb, fr)))
+
+    const lb = h("div", "leader-box")
+    lb.append(h("div", "sk-leader"))
+    grid.append(part("leader", lb))
+
+    const shadows = line()
+    for (const s of ["hero", "window", "satellite", "ground", "float", "lift", "card"]) {
+      const tile = h("div", "shadow-tile")
+      tile.style.boxShadow = `var(--sk-shadow-${s})`
+      shadows.append(part(s, tile))
+    }
+    grid.append(part("shadows", shadows))
+
+    const inks = line()
+    for (let i = 1; i <= 5; i++) inks.append(bar(48, { ink: i }))
+    grid.append(part("inks 1-5", inks))
+
+    sheet.append(grid)
+
+    // Real-UI stage: a glass Chrome window over the color field, a screenshot
+    // in its body, the wash at 0.3 and one built card lifted to 1:1.
+    sheet.append(part("real-UI stage: browserWindow over .sk-colorfield, shots(), wash(0.3), lift()"))
+    const host = h("div", "real-ui")
+    sheet.append(host)
+    realUI(host, look)
+
+    document.getElementById("looks").append(sheet)
+  }
+
+  function realUI(host, look) {
+    const light = look.cls === "look-appbuilder"
+    const meta = { width: 960, height: 640, theme: look.theme }
+    const stage = createStage(host, meta, { className: look.cls })
+    stage.scene.append(h("div", "sk-colorfield"))
+    // 48px gutter at the top and sides; the body has the capture's aspect,
+    // so the window runs off the bottom.
+    const cap = { width: 2400, height: 1500 }
+    const W = 864
+    const win = browserWindow(light
+      ? { title: "Hub pulse · App builder", url: "console.cloud.google.com/agent-studio/apps/hub-pulse", theme: "light", width: W, height: BWIN_CHROME + W * cap.height / cap.width }
+      : { title: "Demo app", url: "localhost:3000", theme: "dark", width: W, height: BWIN_CHROME + W * cap.height / cap.width })
+    win.style.left = "48px"
+    win.style.top = "48px"
+    stage.scene.append(win)
+    const layers = shots(win.body, { ...cap, list: { midday: SHOT } })
+
+    // The card at its product size: 13px App builder text, 12px Design Layer.
+    const card = h("div", "lift-card")
+    card.style.cssText = `width: 248px; padding: 12px; border-radius: var(--sk-radius-lg); background: var(--sk-raised); font-size: ${light ? 13 : 12}px;`
+    const head = h("div", "sat-row")
+    head.append(h("span", "", light ? "Hub pulse" : "Header"), h("span", "sk-badge", "Edited"))
+    head.style.justifyContent = "space-between"
+    card.append(head, Object.assign(bars([72, 54]), { style: "margin-top: 8px" }))
+    stage.scene.append(card)
+
+    const region = { x: 1560, y: 420, w: 480, h: 240 }
+    requestAnimationFrame(() => {
+      const from = layers.rect(region)
+      const bounds = layers.rect({ x: 0, y: 0, w: cap.width, h: cap.height })
+      // Keep the card inside the part of the body the scene shows.
+      bounds.h = Math.min(bounds.h, meta.height - bounds.y)
+      const to = fitRect({ w: card.offsetWidth, h: card.offsetHeight }, from, bounds, { gutter: 24 })
+      wash(win.body, 0.3)
+      lift(card, { from, to })
+    })
+  }
+</script>
+</body>
+</html>

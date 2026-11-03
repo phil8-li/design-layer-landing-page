@@ -1,13 +1,14 @@
 // Design Layer landing page: the story, told by scroll.
 //
-// Progressive: without this file every section still reads, every shot still
-// shows, and every link works. With it, three kinds of motion run:
+// Progressive: without this file every section still reads, every feature
+// section shows its stage's poster, and every link works. With it, three kinds
+// of motion run:
 //   1. Scenes, scrubbed by scroll in one rAF loop: the pinned hero (three
-//      planes held apart, then landed one by one), the pinned tab sets
-//      (scroll walks the tabs), the board (out to every page and back in),
-//      the agent story, and headings brightening word by word.
-//   2. Arrivals, fired once by an IntersectionObserver: the diff playing, the
-//      agent's brief streaming, the get-started scenes.
+//      planes held apart, then landed one by one), the pinned feature tracks
+//      (scroll walks the tabs, and each tab sets its stage's beat), and
+//      headings brightening word by word.
+//   2. Arrivals, fired once by an IntersectionObserver: the stages loading as
+//      their section nears, the get-started scenes, the counters.
 //   3. Interactions: tabs that scroll to their stretch, copy buttons, the
 //      film, and the hero leaning toward the pointer.
 // Reduced motion skips 1 entirely (CSS lays every scene out in its final
@@ -33,11 +34,12 @@ const $$ = (selector, scope = document) => [...scope.querySelectorAll(selector)]
 const params = new URLSearchParams(location.search)
 let demo = params.get("demo") || (params.has("review") && localStorage.getItem("dl-demo")) || "midday"
 let demos = []
-let geometry = {} // selection, focus and pins of the demo on show, in shot pixels
+let geometry = {} // where the demo on show draws its toolbar and panel seams, in shot pixels
 
 const shotPath = (src, slug) => src.replace(/(assets\/shots\/)[^/]+\//, `$1${slug}/`)
 const shotFile = (src, name) => src.replace(/[a-z-]+-(\d+)\.webp/, `${name}-$1.webp`)
 
+// Only the hero's screenshots follow the demo; the feature stages draw their own app.
 function applyDemo(slug) {
   demo = slug
   const info = demos.find((entry) => entry.slug === slug)
@@ -61,13 +63,6 @@ function applyDemo(slug) {
     if (set) img.srcset = set.split(",").map((part) => move(part.trim())).join(", ")
   }
   measureAll()
-  loadAgent(slug).then(() => comment?.measure())
-}
-
-// Lazy shots list only their 1280 file in the markup (budget); add the 2400.
-for (const img of $$("img[data-shot][loading=lazy]")) {
-  img.sizes = "(min-width: 1200px) 1120px, 94vw"
-  img.srcset = `${img.getAttribute("src")} 1280w, ${img.getAttribute("src").replace("-1280.", "-2400.")} 2400w`
 }
 
 async function loadDemos() {
@@ -160,13 +155,10 @@ function tick() {
   for (const [element, scene] of scenes) if (scene.active) scene.update(element.getBoundingClientRect(), vh)
 }
 
-/** Progress through a pinned track: 0 when it reaches the top, 1 when it lets go. */
-const trackProgress = (rect, vh) => clamp(-rect.top / Math.max(1, rect.height - vh))
-
 /* ---------- The editor's toolbar, redrawn over the screenshots ---------- */
 
 // Each [data-toolbar-slot] becomes a copy of the real toolbar, sized in the
-// shot's own pixels, so it stays sharp when the camera moves in and can show
+// shot's own pixels, so it stays sharp as the hero's planes land and can show
 // a state the screenshot under it does not (Notes pressed, a tooltip).
 const toolbars = []
 const TOOLBAR = { x: 636, y: 948, w: 328, h: 40 } // where the editor draws it at 1600x1000
@@ -181,7 +173,6 @@ function setupToolbars() {
       tb,
       chip: $("[data-tb-chip]", tb),
       tools: Object.fromEntries($$("[data-tool]", tb).map((tool) => [tool.dataset.tool, tool])),
-      undo: $$(".tb-tool", tb)[3],
       tour: slot.hasAttribute("data-tour"),
     })
   }
@@ -271,8 +262,9 @@ function setupShotSpaces() {
 // lands the planes in order — panels, then the toolbar, which presses in and
 // settles while a soft light marks the click — and every transform ends at
 // none, so the layers meet pixel for pixel in the real screenshot. They land
-// straight into the frame of Design like Figma, pinned underneath and opening
-// on the same screenshot, so the hand-off is one move with no size change.
+// straight into the frame of Design like Figma, pinned underneath at the
+// mock's own size and place, so the hand-off is one move with no size change;
+// the stage underneath is the same capture, so the mock fades into it (handOff).
 const hero = (() => {
   const track = $("[data-hero]")
   if (!track) return null
@@ -363,7 +355,9 @@ const hero = (() => {
     base = { fx: filmBox.left - stageBox.left, fy: filmBox.top - stageBox.top, ox: viewBox.left - filmBox.left, oy: viewBox.top - filmBox.top, w: viewBox.width }
     ;[film, stack, chrome, tools].forEach((node, i) => (node.style.transform = saved[i] ?? ""))
     film.style.transformOrigin = "0 0"
-    // Where that frame sits once its stage pins.
+    // Where that frame sits once its stage pins. The stage (stages/edit.js) is
+    // the same capture at the mock's 1.6, bare, so the mock lands on the whole
+    // stage and the picture simply continues.
     if (nextView) {
       const pinned = $(".tabs-stage", next).getBoundingClientRect()
       const target = nextView.getBoundingClientRect()
@@ -373,7 +367,7 @@ const hero = (() => {
   }
 
   /** The hand-off over the next section's lead-in: its title and tabs fade in
-   *  over the landed mock, and its frame takes over the same picture. */
+   *  over the landed mock, and its frame takes over in the same place. */
   function handOff(vh) {
     if (!next) return
     const box = next.getBoundingClientRect()
@@ -385,7 +379,11 @@ const hero = (() => {
       node.style.opacity = rise.toFixed(3)
       node.style.transform = rise < 1 ? `translate3d(0, ${(16 * (1 - rise)).toFixed(1)}px, 0)` : ""
     }
-    nextFrame.style.opacity = range(f, 0.92, 1).toFixed(3)
+    // The mock holds landed; the stage (the same capture on the same rect)
+    // comes up under it, then the mock and its rim fade away, so the picture
+    // never changes and only the rim is seen to go.
+    nextFrame.style.opacity = range(f, 0.6, 0.75).toFixed(3)
+    film.style.opacity = (1 - range(f, 0.82, 0.96)).toFixed(3)
     film.style.visibility = f >= 1 ? "hidden" : ""
   }
 
@@ -521,309 +519,6 @@ function tabKeys(tabs, current, choose) {
     })
   })
 }
-
-/* ---------- Scene: iterate with your agent ---------- */
-
-// Four beats, one camera, a tab each: Point (notes are pinned), Send (the
-// agent's brief streams in), Compare (the agent's options are switches; one is
-// flipped) and Pick (a note keeps one; the agent closes the rest out).
-const comment = (() => {
-  const track = $("[data-comment]")
-  if (!track) return null
-  const zoom = $("[data-comment-zoom]", track)
-  const shots = $$("img[data-beat]", zoom)
-  const pinsBox = $("[data-pins]", track)
-  const ring = $("[data-send-ring]", track)
-  const optionRing = $("[data-option-ring]", track)
-  const pickNote = $("[data-pick-note]", track)
-  const terminal = $("[data-comment-terminal]", track)
-  const body = terminal && $(".terminal-body", terminal)
-  const codes = terminal ? [$("[data-agent]", terminal), $("[data-agent-close]", terminal)] : []
-  const switcher = $("[data-comment-switcher]", track)
-  const tabs = switcher ? $$('[role="tab"]', switcher) : []
-  const pill = switcher && $(".switcher-pill", switcher)
-  const space = $("[data-shot-space]", zoom)
-  const panel = $("#agent-view")
-  const WINDOWS = [[0, 0.25], [0.25, 0.5], [0.5, 0.75], [0.75, 1]] // each beat's stretch of scroll
-  const BEAT_SHOT = [1, 2, 4, 4] // the shot each tab shows when there is no scroll to play it
-  const BEAT_REST = [0.24, 0.49, 0.74, 1] // and the moment its drawn cues rest at
-  const OPTION_ROW = { x: 14, y: 249, w: 256, h: 24 }
-  let tab = -1
-  let toolbar = null
-  let pins = []
-  let keys = []
-  let lines = [0, 0]
-  let lineHeight = 22
-  let active = -1
-  let shown = -1
-
-  const placePill = (animate) => movePill(pill, tabs[tab], animate)
-
-  const selectTab = (index, { focus = false } = {}) => {
-    if (index !== tab && tabs[index]) {
-      tab = index
-      tabs.forEach((node, i) => {
-        node.setAttribute("aria-selected", String(i === index))
-        node.tabIndex = i === index ? 0 : -1
-        if (i !== index) node.style.removeProperty("--fill")
-      })
-      panel?.setAttribute("aria-labelledby", tabs[index].id)
-      placePill(true)
-      centerTab(tabs[index])
-    }
-    if (focus) tabs[index]?.focus({ preventScroll: true })
-  }
-
-  const showCode = (index) => {
-    if (index === shown) return
-    shown = index
-    codes.forEach((code, i) => code && (code.hidden = i !== index))
-  }
-
-  /** A beat at rest, for reduced motion. */
-  const still = (index) => {
-    setBeat(BEAT_SHOT[index])
-    space?.style.setProperty("--t", String(BEAT_REST[index]))
-    pickNote?.style.setProperty("--o", index === 3 ? "1" : "0")
-    showCode(index === 3 ? 1 : 0)
-  }
-
-  const choose = (index, options) => {
-    selectTab(index, options)
-    if (reducedMotion.matches) {
-      still(index)
-      return
-    }
-    scrollTrack(track, WINDOWS[index][0] + 0.03)
-  }
-
-  tabKeys(tabs, () => tab, choose)
-
-  const setBeat = (index) => {
-    if (index === active) return
-    active = index
-    shots.forEach((shot, i) => {
-      if (i === index && shot.loading === "lazy") shot.loading = "eager"
-      shot.classList.toggle("is-active", i === index)
-    })
-    // Warm the next shot so the crossfade never waits on the network.
-    const next = shots[index + 1]
-    if (next?.loading === "lazy") next.loading = "eager"
-  }
-
-  function measure() {
-    toolbar = toolbars.find((entry) => zoom.contains(entry.tb)) ?? null
-    const marks = geometry.pins ?? []
-    pinsBox.replaceChildren(
-      ...marks.map((mark) => {
-        const pin = document.createElement("span")
-        pin.className = "pin"
-        pin.style.left = `${mark.x}px`
-        pin.style.top = `${mark.y}px`
-        return pin
-      })
-    )
-    pins = $$(".pin", pinsBox)
-    const send = geometry.send
-    if (ring) {
-      ring.hidden = !send
-      if (send) Object.assign(ring.style, { left: `${send.x - 4}px`, top: `${send.y - 4}px`, width: `${send.w + 8}px`, height: `${send.h + 8}px` })
-    }
-    const row = (geometry.options ?? []).find((entry) => /tilt/i.test(entry.label ?? "")) ?? OPTION_ROW
-    if (optionRing) Object.assign(optionRing.style, { left: `${row.x - 4}px`, top: `${row.y - 3}px`, width: `${row.w + 8}px`, height: `${row.h + 6}px` })
-    const bar = geometry.toolbar ?? TOOLBAR
-    const seams = geometry.seams ?? SEAM
-    const xs = marks.map((mark) => mark.x)
-    const ys = marks.map((mark) => mark.y)
-    const pinsAt = marks.length ? { x: (Math.min(...xs) + Math.max(...xs)) / 2, y: (Math.min(...ys) + Math.max(...ys)) / 2 } : { x: 800, y: 420 }
-    const sendAt = send ? { x: send.x + send.w / 2, y: send.y + send.h / 2 } : { x: ((1 + seams.right) / 2) * VIEW.w, y: 320 }
-    // Where the camera looks (shot px) and how close, at each point of the scroll.
-    // At 1.87 the toolbar's frame tops out in the gap between the subtitle and
-    // Get started (y 466), so no line of text is cut.
-    keys = [
-      { at: 0, x: 800, y: 500, s: 1 },
-      { at: 0.05, x: bar.x + bar.w / 2, y: bar.y, s: 1.87 },
-      { at: 0.11, x: bar.x + bar.w / 2, y: bar.y, s: 1.87 },
-      { at: 0.16, x: pinsAt.x, y: pinsAt.y, s: 1.2 },
-      { at: 0.24, x: pinsAt.x, y: pinsAt.y, s: 1.2 },
-      { at: 0.3, x: sendAt.x, y: sendAt.y, s: 1.65 },
-      { at: 0.37, x: sendAt.x, y: sendAt.y, s: 1.65 },
-      { at: 0.43, x: 800, y: 500, s: 1 },
-      { at: 0.53, x: 800, y: 500, s: 1 },
-      { at: 0.58, x: 760, y: 520, s: 1.12 },
-      { at: 0.72, x: 760, y: 520, s: 1.12 },
-      { at: 0.78, x: 800, y: 500, s: 1 },
-      { at: 1, x: 800, y: 500, s: 1 },
-    ]
-    lines = codes.map((code) => (code ? $$(".tl", code).length : 0))
-    if (codes[0]) lineHeight = parseFloat(getComputedStyle(codes[0]).lineHeight) || 22
-    switcher?.classList.toggle("is-scrolling", !reducedMotion.matches)
-    if (tab < 0) selectTab(0)
-    placePill(false)
-  }
-
-  function camera(p) {
-    let i = 0
-    while (i < keys.length - 2 && p > keys[i + 1].at) i++
-    const a = keys[i]
-    const b = keys[i + 1]
-    const t = easeInOut(range(p, a.at, b.at))
-    const s = lerp(a.s, b.s, t)
-    // Keep the shot covering the frame: no empty edges when close in.
-    const halfW = VIEW.w / (2 * s)
-    const halfH = VIEW.h / (2 * s)
-    const x = clamp(lerp(a.x, b.x, t), halfW, VIEW.w - halfW)
-    const y = clamp(lerp(a.y, b.y, t), halfH, VIEW.h - halfH)
-    zoom.style.transformOrigin = "0 0"
-    zoom.style.transform = `translate3d(${(((VIEW.w / 2 - s * x) / VIEW.w) * 100).toFixed(3)}%, ${(((VIEW.h / 2 - s * y) / VIEW.h) * 100).toFixed(3)}%, 0) scale(${s.toFixed(4)})`
-  }
-
-  function stream(index, reveal) {
-    const code = codes[index]
-    if (!code) return
-    code.style.setProperty("--reveal", reveal.toFixed(2))
-    const visible = body.clientHeight - 28
-    code.style.transform = `translate3d(0, ${-Math.max(0, reveal * lineHeight - visible).toFixed(1)}px, 0)`
-  }
-
-  function update(rect, vh) {
-    const p = trackProgress(rect, vh)
-    camera(p)
-    space?.style.setProperty("--t", p.toFixed(3))
-
-    // Point.
-    if (toolbar) {
-      setToolbarMode(toolbar, easeInOut(range(p, 0.06, 0.1)) * (1 - easeInOut(range(p, 0.5, 0.54))))
-      showTip(toolbar, p > 0.07 && p < 0.15 ? "notes" : null)
-      toolbar.undo.classList.toggle("is-dim", p < 0.27)
-    }
-    setBeat(p < 0.13 ? 0 : p < 0.27 ? 1 : p < 0.55 ? 2 : p < 0.65 ? 3 : 4)
-    pinsBox.hidden = p >= 0.55
-    pins.forEach((pin, i) => {
-      const at = 0.16 + i * 0.025
-      pin.style.setProperty("--ring", p < at ? "0" : (1 - range(p, at, at + 0.06)).toFixed(3))
-      pin.style.setProperty("--ring2", p < at + 0.015 ? "0" : (1 - range(p, at + 0.015, at + 0.08)).toFixed(3))
-    })
-
-    // Send.
-    if (ring && !ring.hidden) {
-      ring.style.setProperty("--o", (range(p, 0.3, 0.33) * (1 - range(p, 0.4, 0.43))).toFixed(3))
-      ring.style.setProperty("--s", (1 - 0.06 * Math.sin(Math.PI * range(p, 0.34, 0.37))).toFixed(4))
-    }
-
-    // Compare, then Pick.
-    optionRing?.style.setProperty("--o", (range(p, 0.6, 0.63) * (1 - range(p, 0.71, 0.75))).toFixed(3))
-
-    pickNote?.style.setProperty("--o", easeOut(range(p, 0.8, 0.84)).toFixed(3))
-
-    // The terminal streams the brief after Send, steps aside, then the close-out.
-    if (terminal) {
-      const second = p >= 0.7
-      showCode(second ? 1 : 0)
-      const enter = second ? easeOut(range(p, 0.85, 0.9)) : easeOut(range(p, 0.38, 0.44)) * (1 - easeInOut(range(p, 0.53, 0.57)))
-      terminal.style.opacity = enter.toFixed(3)
-      terminal.style.transform = `translate3d(${lerp(56, 0, enter).toFixed(1)}px, ${lerp(28, 0, enter).toFixed(1)}px, 0) scale(${lerp(0.96, 1, enter).toFixed(4)})`
-      terminal.style.pointerEvents = enter > 0.5 ? "" : "none"
-      if (second) stream(1, lerp(0, lines[1] + 1, range(p, 0.88, 0.99)))
-      else stream(0, lerp(0, lines[0] + 1, range(p, 0.41, 0.52)))
-    }
-
-    // The tab of the beat on screen, filling as its stretch of scroll runs out.
-    const index = Math.max(0, WINDOWS.findIndex(([, end]) => p < end))
-    const now = p >= 1 ? WINDOWS.length - 1 : index
-    selectTab(now)
-    tabs[now]?.style.setProperty("--fill", range(p, ...WINDOWS[now]).toFixed(3))
-  }
-
-  function reset() {
-    zoom.removeAttribute("style")
-    active = -1
-    pinsBox.hidden = false
-    for (const pin of pins) {
-      pin.style.setProperty("--ring", "0")
-      pin.style.setProperty("--ring2", "0")
-    }
-    if (toolbar) {
-      setToolbarMode(toolbar, 1)
-      showTip(toolbar, null)
-      toolbar.undo.classList.remove("is-dim")
-    }
-    ring?.style.setProperty("--o", "0")
-    optionRing?.style.setProperty("--o", "0")
-    terminal?.removeAttribute("style")
-    for (const code of codes) {
-      code?.style.removeProperty("--reveal")
-      code?.style.removeProperty("transform")
-    }
-    selectTab(0)
-    still(0)
-    for (const node of tabs) node.style.removeProperty("--fill")
-  }
-
-  addScene(track, update)
-  return { measure, reset }
-})()
-
-/* ---------- Scene: out to the board, and back in live ---------- */
-
-// The panels stay put; the live page shrinks into its frame on the board (⇧1),
-// the pointer clicks Live, and the page grows back until the editor is as it was.
-const canvas = (() => {
-  const track = $("[data-canvas]")
-  if (!track) return null
-  const live = $("[data-canvas-live]", track)
-  const page = $(".canvas-page", track)
-  const badge = $("[data-canvas-badge]", track)
-  const hover = $("[data-canvas-hover]", track)
-  const hand = $("[data-canvas-hand]", track)
-  const ripple = $("[data-canvas-ripple]", track)
-  const clock = $(".frame-view", track)
-  const OUT = [0.06, 0.4] // the page shrinks into the board
-  const IN = [0.62, 0.94] // Live: it grows back
-  let focus = null
-  let column = null
-
-  function measure() {
-    focus = geometry.focus ?? null
-    badge.hidden = hover.hidden = live.hidden = !focus
-    if (!focus) return
-    const seams = geometry.seams ?? SEAM
-    column = { x: seams.left * VIEW.w, w: (seams.right - seams.left) * VIEW.w }
-    Object.assign(live.style, { clipPath: "none", overflow: "hidden", inset: "auto", left: `${seams.left * 100}%`, top: "0", width: `${(column.w / VIEW.w) * 100}%`, height: "100%", transformOrigin: "0 0" })
-    Object.assign($("img", live).style, { inset: "auto", top: "0", left: `${(-seams.left / (seams.right - seams.left)) * 100}%`, width: `${(VIEW.w / column.w) * 100}%`, maxWidth: "none", height: "100%" })
-    Object.assign(badge.style, { left: `${focus.x + focus.w - 8}px`, top: `${focus.y + 8}px` })
-    Object.assign(hover.style, { left: `${focus.x}px`, top: `${focus.y}px`, width: `${focus.w}px`, height: `${focus.h}px` })
-    for (const node of [hand, ripple]) {
-      node.style.setProperty("--x", `${focus.x + focus.w - 36}px`)
-      node.style.setProperty("--y", `${focus.y + 20}px`)
-    }
-  }
-
-  function update(rect, vh) {
-    const p = trackProgress(rect, vh)
-    // 1 is the board; 0 is the live editor.
-    const t = easeInOut(range(p, ...OUT)) * (1 - easeInOut(range(p, ...IN)))
-    clock.style.setProperty("--t", p.toFixed(3))
-    const lit = (range(p, 0.44, 0.48) * (1 - range(p, 0.6, 0.64))).toFixed(3)
-    badge.style.setProperty("--o", lit)
-    hover.style.setProperty("--o", lit)
-    page.style.opacity = (1 - range(t, 0, 0.18)).toFixed(3)
-    if (!focus) return
-    const s = lerp(1, focus.w / column.w, t)
-    live.style.transform = `translate(${((lerp(0, focus.x - column.x, t) / column.w) * 100).toFixed(3)}%, ${((lerp(0, focus.y, t) / VIEW.h) * 100).toFixed(3)}%) scale(${s.toFixed(4)})`
-    live.style.opacity = (1 - range(t, 0.85, 1)).toFixed(3)
-  }
-
-  function reset() {
-    page.style.removeProperty("opacity")
-    badge.style.setProperty("--o", "1")
-    hover.style.setProperty("--o", "1")
-    clock.style.setProperty("--t", clock.dataset.rest ?? "1")
-  }
-
-  addScene(track, update)
-  return { measure, reset }
-})()
 
 /* ---------- The nav arrives with the second section ---------- */
 
@@ -1111,26 +806,6 @@ function setupTweak() {
   paint()
 }
 
-// Direct edit: the double-click selects "vibe-coded"; each letter of "real"
-// replaces it at its own moment of the tab's scroll.
-function setupTypeEdit() {
-  const layer = $("[data-type-edit]")
-  const shot = layer?.closest(".shot")
-  if (!shot) return
-  const word = $("[data-te-word]", layer)
-  const key = $("[data-te-key]", shot)
-  const KEYS = [0.46, 0.52, 0.58, 0.64]
-  let shown = -1
-  shot.typeEdit = (t) => {
-    const typed = KEYS.filter((at) => t >= at).length
-    if (typed === shown) return
-    shown = typed
-    word.textContent = typed ? "real".slice(0, typed) : "vibe-coded"
-    word.classList.toggle("is-sel", !typed)
-    if (key) key.textContent = "REAL"[Math.max(0, typed - 1)]
-  }
-}
-
 function setupArrivals() {
   for (const element of $$("[data-rise]")) onArrive(element, () => {})
   for (const list of $$("[data-reveal]")) onArrive(list, () => {})
@@ -1179,151 +854,127 @@ function setupArrivals() {
   }
 }
 
-/* ---------- Text helpers ---------- */
+/* ---------- Stages: the feature demos, drawn in the editor's own look ---------- */
 
-const escapeHtml = (text) => text.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c])
+// Each [data-stage] is a hand-built demo (stages/<name>.js, see stages/README.md)
+// with numbered beats: set(k) from k - 1 plays beat k's gesture, any other
+// change jumps to its rest. A stage loads when its section comes within one
+// screen; until then, and without script, its poster shows the payoff. The page
+// keeps the beat it wants for each stage, so a beat chosen before the module
+// arrives is the one it mounts on.
+const stages = new Map() // root -> { stage, wanted, shown }
+let stageSheets = null
 
-/* ---------- What the agent receives over MCP ---------- */
-
-function highlightJson(value, depth = 0) {
-  const pad = "  ".repeat(depth)
-  const inner = "  ".repeat(depth + 1)
-  if (Array.isArray(value)) {
-    if (!value.length) return "[]"
-    const items = value.slice(0, 3).map((item) => inner + highlightJson(item, depth + 1))
-    if (value.length > 3) items.push(`${inner}<span class="t-dim">… ${value.length - 3} more</span>`)
-    return `[\n${items.join(",\n")}\n${pad}]`
-  }
-  if (value && typeof value === "object") {
-    const entries = Object.entries(value)
-    if (!entries.length) return "{}"
-    const shown = entries.slice(0, 8).map(([key, item]) => `${inner}<span class="t-key">"${escapeHtml(key)}"</span>: ${highlightJson(item, depth + 1)}`)
-    if (entries.length > 8) shown.push(`${inner}<span class="t-dim">…</span>`)
-    return `{\n${shown.join(",\n")}\n${pad}}`
-  }
-  if (typeof value === "string") {
-    const first = value.split("\n")[0]
-    const short = first.length > 56 ? `${first.slice(0, 55)}…` : first + (value.includes("\n") ? " …" : "")
-    return `<span class="t-str">"${escapeHtml(short)}"</span>`
-  }
-  return `<span class="t-ok">${escapeHtml(String(value))}</span>`
-}
-
-/** The tool result, unwrapped from JSON-RPC and MCP content blocks when present. */
-function unwrapAgentPayload(data) {
-  let value = data?.result ?? data
-  const text = value?.content?.find?.((block) => block.type === "text")?.text
-  if (typeof text === "string") {
-    try {
-      value = JSON.parse(text)
-    } catch {
-      value = text
-    }
-  } else if (value?.structuredContent) {
-    value = value.structuredContent
-  }
-  return value
-}
-
-/** Splits highlighted markup into lines, closing and reopening spans across breaks. */
-function streamLines(html) {
-  const lines = []
-  const open = []
-  for (const raw of html.split("\n")) {
-    const line = open.join("") + raw
-    for (const tag of raw.match(/<\/?span[^>]*>/g) ?? []) {
-      if (tag.startsWith("</")) open.pop()
-      else open.push(tag)
-    }
-    lines.push(line + "</span>".repeat(open.length))
-  }
-  return lines.map((line, i) => `<span class="tl" style="--i:${i}">${line || " "}</span>`).join("\n")
-}
-
-async function agentBrief(slug, file) {
-  try {
-    const response = await fetch(`${SHOTS}/${slug}/${file}`)
-    if (!response.ok) throw new Error(String(response.status))
-    const payload = unwrapAgentPayload(await response.json())
-    return typeof payload === "string" ? escapeHtml(payload.slice(0, 1800)) : highlightJson(payload)
-  } catch {
-    return null
-  }
-}
-
-async function loadAgent(slug) {
-  const code = $("[data-agent]")
-  if (!code) return
-  const close = $("[data-agent-close]")
-  const setup = `<span class="t-dim"># Any MCP client works. Claude Code:</span>\n$ claude mcp add --transport http designlayer \\\n    http://127.0.0.1:5747/mcp\n`
-  const call = `<span class="t-dim">› designlayer.wait_for_change()</span>`
-  const done = `<span class="t-dim">› designlayer.resolve_change(</span><span class="t-str">"applied"</span><span class="t-dim">)</span>\n<span class="t-ok">✓</span> Resolved. Waiting for the next change…`
-  const [first, last] = await Promise.all([agentBrief(slug, "agent.json"), close ? agentBrief(slug, "agent-close.json") : null])
-  code.innerHTML = streamLines(`${setup}\n${call}\n${first ?? "This demo has no recorded handoff."}\n\n${done}`)
-  if (close) close.innerHTML = last ? streamLines(`${call}\n${last}\n\n${done}`) : ""
-  if (code.classList.contains("is-playing")) {
-    code.classList.remove("is-playing")
-    void code.offsetWidth
-    code.classList.add("is-playing")
-    return
-  }
-  onArrive(code.closest("figure") ?? code, () => {
-    code.classList.add("is-playing")
-    close?.classList.add("is-playing")
-    for (const block of [code, close]) {
-      const tail = block && $$(".tl", block).at(-1)
-      if (!tail || reducedMotion.matches) continue
-      const cursor = document.createElement("span")
-      cursor.className = "cursor"
-      cursor.setAttribute("aria-hidden", "true")
-      tail.append(cursor)
-    }
+const sheetLoaded = (link) =>
+  link.sheet ? Promise.resolve() : new Promise((resolve) => {
+    link.addEventListener("load", resolve, { once: true })
+    link.addEventListener("error", resolve, { once: true })
   })
+
+/** The kit's two sheets, once, before the first stage mounts. */
+function loadStageSheets() {
+  stageSheets ??= Promise.all(["stagekit.css", "look-designlayer.css"].map((name) => {
+    const link = document.createElement("link")
+    link.rel = "stylesheet"
+    link.href = new URL(`./stages/${name}`, import.meta.url).href
+    document.head.append(link)
+    return sheetLoaded(link)
+  }))
+  return stageSheets
 }
 
-/* ---------- Tab sets: scroll walks the tabs, and the tabs move the scroll ---------- */
+function setStage(root, beat) {
+  const entry = stages.get(root)
+  if (!entry || entry.wanted === beat) return
+  entry.wanted = beat
+  if (entry.stage && entry.shown !== beat) {
+    entry.shown = beat
+    entry.stage.set(beat)
+  }
+}
 
-// Each tab set sits in a pinned track where every tab owns an equal stretch of
-// scroll: scrolling advances the tab, its shot and the pill, and the chosen
-// tab fills as its stretch runs out. Choosing a tab scrolls to its stretch, so
-// the scroll position and the selection never disagree. With reduced motion
-// (or no track) they are plain tabs.
+async function mountStage(root) {
+  const entry = stages.get(root)
+  try {
+    const [mod] = await Promise.all([import(`./stages/${root.dataset.stage}.js`), loadStageSheets()])
+    entry.stage = mod.mount(root)
+    // The drawn buttons and fields are a picture of the editor, not controls:
+    // they take no focus or clicks, and the root's aria-label speaks for them.
+    const scene = root.querySelector(":scope > .sk-scene")
+    if (scene) scene.inert = true
+    entry.shown = entry.wanted
+    entry.stage.set(entry.wanted, { instant: true })
+    // The module links its own sheet; the poster stays until that has applied,
+    // so the swap is never to an unstyled scene.
+    const pending = $$('link[rel="stylesheet"]').filter((link) => !link.sheet)
+    await Promise.race([Promise.all(pending.map(sheetLoaded)), new Promise((r) => setTimeout(r, 3000))])
+    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))
+    root.classList.add("is-mounted")
+    const poster = root.parentElement.querySelector(":scope > .stage-poster")
+    if (poster) poster.hidden = true
+    // The frame's height is the stage's now, not the poster's; the pinned
+    // stage centers its column on that height, so the hero re-measures where
+    // Design like Figma's stage sits before the mock lands on it.
+    if (root.dataset.stage === "edit") measureAll()
+  } catch (error) {
+    console.warn(`Stage ${root.dataset.stage} off:`, error) // the poster stays
+  }
+}
+
+function setupStages() {
+  const roots = $$("[data-stage]")
+  for (const root of roots) stages.set(root, { stage: null, wanted: -1, shown: null })
+  const near = new IntersectionObserver((entries) => {
+    for (const { target, isIntersecting } of entries) {
+      if (!isIntersecting) continue
+      near.unobserve(target)
+      for (const root of roots) if (target.contains(root) && !stages.get(root).loading) {
+        stages.get(root).loading = true
+        mountStage(root)
+      }
+    }
+  }, { rootMargin: "100% 0px" })
+  for (const section of new Set(roots.map((root) => root.closest("section") ?? root))) near.observe(section)
+}
+
+/* ---------- Feature tracks: scroll walks the tabs, and the tabs move the scroll ---------- */
+
+// Each feature section sits in a pinned track where every tab owns an equal
+// stretch of scroll: scrolling advances the tab, the pill and the stage's beat,
+// and the chosen tab fills as its stretch runs out. Choosing a tab scrolls to
+// its stretch, so the scroll position and the selection never disagree. Until
+// the stage pins it rests on its opening still, so the first beat's gesture
+// plays where it can be seen. A track with no tabs (data-stage-beats="N")
+// walks the opening still and then N beats. With reduced motion the tracks
+// do not pin and the tabs are plain tabs.
 const switchers = []
 
 function setupSwitchers() {
-  for (const switcher of $$("[data-switcher]")) {
-    const track = switcher.closest("[data-tabs]")
-    const list = $('[role="tablist"]', switcher)
-    const pill = $(".switcher-pill", switcher)
-    const tabs = $$('[role="tab"]', switcher)
-    const view = document.getElementById(tabs[0]?.getAttribute("aria-controls"))
-    const shots = view ? $$(".frame-zoom > .shot", view) : []
-    const collapse = view && $("[data-collapse]", view)
-    // Design system: one camera across the tabs, from the whole editor to each
-    // tab's panel, gliding over every boundary instead of backing out.
-    const cams = shots.map((shot) => shot.dataset.cam?.split(" ").map(Number))
-    const zoom = cams[0] && $(".frame-zoom", view)
-    const aim = (p) => {
-      const keys = [[0, [1, 800, 500]]]
-      cams.forEach((cam, i) => keys.push([i + (i ? 0.15 : 0.2), cam], [i + 0.85, cam]))
-      let k = 0
-      while (k < keys.length - 2 && p > keys[k + 1][0]) k++
-      const e = easeInOut(range(p, keys[k][0], keys[k + 1][0]))
-      const [z, x, y] = keys[k][1].map((v, j) => lerp(v, keys[k + 1][1][j], e))
-      const cx = clamp(x, 800 / z, 1600 - 800 / z)
-      const cy = clamp(y, 500 / z, 1000 - 500 / z)
-      zoom.style.setProperty("--s", z.toFixed(4))
-      zoom.style.transform = `translate(${((z * (800 - cx)) / 16).toFixed(3)}%, ${((z * (500 - cy)) / 10).toFixed(3)}%) scale(${z.toFixed(4)})`
-    }
+  for (const track of $$("[data-tabs]")) {
+    const switcher = $("[data-switcher]", track)
+    const list = $('[role="tablist"]', track)
+    const pill = $(".switcher-pill", track)
+    const tabs = $$('[role="tab"]', track)
+    const root = $("[data-stage]", track)
+    const view = root?.closest(".frame-view")
+    const beats = Number(track.dataset.stageBeats) || 0
+    const weights = (list?.dataset.weights || "").split(/\s+/).map(Number).filter((n) => n > 0)
+    while (weights.length < tabs.length) weights.push(1)
+    const total = tabs.length ? weights.slice(0, tabs.length).reduce((a, b) => a + b, 0) : 1
     let index = 0
-    track?.style.setProperty("--tabs", tabs.length)
-    const scrolled = () => Boolean(track) && !reducedMotion.matches
+    // The track's height counts the stretches: a weighted tab counts as that
+    // many; a track with no tabs may ask for more than one per beat
+    // (data-stage-stretches), which lengthens each of its beats alike.
+    track.style.setProperty("--tabs", tabs.length ? total : Number(track.dataset.stageStretches) || beats + 1)
+    const scrolled = () => !reducedMotion.matches
     // A lead-in (data-lead, in vh) before the first tab: the hero's hand-off.
-    const leadIn = () => ((Number(track?.dataset.lead) || 0) / 100) * window.innerHeight
+    const leadIn = () => ((Number(track.dataset.lead) || 0) / 100) * window.innerHeight
+    const show = (beat) => root && setStage(root, beat)
 
     const placePill = (animate) => movePill(pill, tabs[index], animate)
 
     const select = (next, { focus = false } = {}) => {
+      if (!tabs.length) return
       index = clamp(next, 0, tabs.length - 1)
       tabs.forEach((tab, i) => {
         tab.setAttribute("aria-selected", String(i === index))
@@ -1331,24 +982,13 @@ function setupSwitchers() {
         if (i !== index) tab.style.removeProperty("--fill")
       })
       view?.setAttribute("aria-labelledby", tabs[index].id)
-      const warm = (shot) => {
-        for (const img of shot ? (shot.tagName === "IMG" ? [shot] : $$("img", shot)) : []) if (img.loading === "lazy") img.loading = "eager"
-      }
-      shots.forEach((shot, i) => {
-        if (i === index) warm(shot)
-        if (!scrolled()) shot.style.setProperty("--t", shot.dataset.rest ?? "1")
-        shot.classList.toggle("is-active", i === index)
-        if (i === index) shot.removeAttribute("aria-hidden")
-        else shot.setAttribute("aria-hidden", "true")
-      })
-      // Warm the next shot so a crossfade never waits on the network.
-      warm(shots[index + 1])
       if (focus) tabs[index].focus({ preventScroll: true })
       placePill(true)
-      // When the page scroll drives the tabs, slide() keeps the tab in view.
+      // When the page scroll drives the tabs, slide() keeps the tab in view
+      // and the scene sets the beat.
       if (!scrolled()) {
         centerTab(tabs[index])
-        if (zoom) aim(index + 0.5)
+        show(index)
       }
     }
 
@@ -1356,8 +996,7 @@ function setupSwitchers() {
     const choose = (next, options) => {
       const target = clamp(next, 0, tabs.length - 1)
       select(target, options)
-      if (!scrolled()) return
-      scrollTrack(track, (target + 0.04) / tabs.length, leadIn())
+      if (scrolled()) scrollTrack(track, (weights.slice(0, target).reduce((a, b) => a + b, 0) + 0.04) / total, leadIn())
     }
 
     tabKeys(tabs, () => index, choose)
@@ -1382,30 +1021,32 @@ function setupSwitchers() {
     window.addEventListener("resize", fade)
     fade()
 
-    if (track) {
-      addScene(track, (rect, vh) => {
-        const lead = leadIn()
-        const p = clamp((-rect.top - lead) / Math.max(1, rect.height - vh - lead)) * tabs.length
-        const next = Math.min(tabs.length - 1, Math.floor(p))
-        if (next !== index) select(next)
-        const fill = clamp(p - index)
-        if (zoom) aim(p)
-        tabs[index].style.setProperty("--fill", fill.toFixed(3))
-        shots[index]?.style.setProperty("--t", fill.toFixed(3))
-        shots[index]?.typeEdit?.(fill)
-        if (scrolled()) slide(fill)
-        // Hide: the panels slide away and stay away, leaving the round button.
-        if (collapse && shots[index] === collapse) {
-          const out = easeInOut(range(fill, 0.1, 0.4))
-          collapse.style.setProperty("--out", out.toFixed(3))
-        }
-      })
-    }
+    addScene(track, (rect, vh) => {
+      const lead = leadIn()
+      const raw = (-rect.top - lead) / Math.max(1, rect.height - vh - lead)
+      const p = clamp(raw)
+      if (!tabs.length) {
+        show(clamp(Math.floor(p * (beats + 1)) - 1, -1, beats - 1))
+        return
+      }
+      // A tab's stretch of the track is its weight's share (data-weights on
+      // the tablist, one number per tab; default 1 each), so a beat whose
+      // gesture needs reading time holds the screen longer.
+      const stop = (i) => weights.slice(0, i).reduce((a, b) => a + b, 0) / total
+      let next = 0
+      while (next < tabs.length - 1 && p >= stop(next + 1)) next++
+      if (next !== index) select(next)
+      show(raw < 0 ? -1 : index)
+      const fill = clamp((p - stop(index)) / (weights[index] / total))
+      tabs[index].style.setProperty("--fill", fill.toFixed(3))
+      slide(fill)
+    })
+
     const mode = () => {
-      switcher.classList.toggle("is-scrolling", scrolled())
-      if (scrolled()) return
-      for (const shot of shots) shot.style.setProperty("--t", shot.dataset.rest ?? "1")
-      if (zoom) aim(index + 0.5)
+      switcher?.classList.toggle("is-scrolling", scrolled() && tabs.length > 0)
+      // Unpinned, the chosen tab's rest shows (the first tab's on load); the
+      // board, with no tabs, rests on its first beat, the frame its poster shows.
+      if (!scrolled()) show(tabs.length ? index : 0)
     }
     mode()
     switchers.push({ placePill, mode })
@@ -1529,8 +1170,6 @@ async function loadRepo() {
 
 function measureAll() {
   hero?.measure()
-  comment?.measure()
-  canvas?.measure()
   for (const entry of headings) entry.measure()
   requestTick()
 }
@@ -1539,9 +1178,6 @@ function onMotionPreference() {
   for (const entry of switchers) entry.mode()
   if (reducedMotion.matches) {
     hero?.reset()
-    comment?.reset()
-    canvas?.reset()
-    $("[data-collapse]")?.style.removeProperty("--out")
     for (const entry of headings) for (const mark of entry.marks) {
       mark.word.style.removeProperty("--lit")
       mark.lit = -1
@@ -1558,16 +1194,15 @@ document.fonts?.ready.then(measureAll)
 setupToolbars()
 setupShotSpaces()
 setupHeadings()
-setupTypeEdit()
 setupToken()
 setupTweak()
 setupArrivals()
+setupStages()
 setupSwitchers()
 setupGlow()
 setupCopy()
 setupFilm()
 measureAll()
-if (reducedMotion.matches) comment?.reset()
 loadDemos()
 loadRepo()
 hero?.playIntro()

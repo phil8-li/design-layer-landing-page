@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Stage preview</title>
+<link rel="stylesheet" href="./stagekit.css">
+<link rel="stylesheet" href="./look-designlayer.css">
+<link rel="stylesheet" href="./look-appbuilder.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block">
+<style>
+  /* Harness chrome: plain, out of the stage. */
+  :root { color-scheme: light dark; --line: rgb(128 128 128 / 0.3); }
+  body { margin: 0; font: 12px/1.4 -apple-system, BlinkMacSystemFont, system-ui, sans-serif; background: #fff; color: #111; }
+  body[data-theme="dark"] { background: #0a0a0a; color: #e5e5e5; }
+  .bar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; padding: 8px 12px; border-bottom: 1px solid var(--line); }
+  .group { display: flex; align-items: center; gap: 4px; }
+  button { font: inherit; padding: 3px 8px; border: 1px solid var(--line); border-radius: 4px; background: transparent; color: inherit; }
+  button[aria-pressed="true"] { background: rgb(128 128 128 / 0.22); }
+  label { display: inline-flex; align-items: center; gap: 4px; }
+  .readout { margin-left: auto; font-variant-numeric: tabular-nums; opacity: 0.8; }
+  .error { padding: 12px; color: #d33; white-space: pre-wrap; }
+  .wrap { padding: 24px 0; }
+  .host { margin: 0 auto; max-width: 100%; }
+</style>
+</head>
+<body>
+<div class="bar">
+  <div class="group" id="beats"></div>
+  <div class="group">
+    <button id="prev" type="button" aria-label="Previous beat">←</button>
+    <button id="next" type="button" aria-label="Next beat">→</button>
+    <button id="play" type="button">Pause</button>
+  </div>
+  <div class="group" id="widths"></div>
+  <label><input type="checkbox" id="instant"> instant</label>
+  <label><input type="checkbox" id="reduced"> reduced</label>
+  <div class="readout" id="readout" aria-live="polite"></div>
+</div>
+<div class="wrap"><div class="host" id="host"></div></div>
+<script type="module">
+  import { forceReduced } from "./stagekit.js"
+
+  const params = new URLSearchParams(location.search)
+  const name = params.get("stage") || "demo-smoke"
+  const $ = id => document.getElementById(id)
+  const host = $("host")
+  let width = Number(params.get("width")) || 1120
+  let stage = null
+  let meta = null
+  let beat = -1
+  let playing = true
+
+  $("instant").checked = params.get("instant") === "1"
+  $("reduced").checked = params.get("reduced") === "1"
+  forceReduced($("reduced").checked)
+
+  function setParam(k, v) {
+    if (v === null || v === undefined || v === false) params.delete(k)
+    else params.set(k, v)
+    history.replaceState(null, "", `?${params}`)
+  }
+
+  function readout() {
+    const label = beat < 0 ? "opening still" : `${beat}: ${meta.beats[beat]}`
+    $("readout").textContent = `${name} · beat ${label} · ${host.dataset.layout || ""} · ${playing ? "playing" : "paused"}`
+    for (const b of $("beats").children) b.setAttribute("aria-pressed", String(Number(b.dataset.beat) === beat))
+  }
+
+  function go(k, opts = {}) {
+    k = Math.max(-1, Math.min(k, meta.beats.length - 1))
+    beat = k
+    stage.set(k, { instant: $("instant").checked || !!opts.instant })
+    setParam("beat", k < 0 ? null : k)
+    readout()
+  }
+
+  function sizeHost() {
+    host.style.width = `${width}px`
+    for (const b of $("widths").children) b.setAttribute("aria-pressed", String(Number(b.dataset.w) === width))
+    setParam("width", width)
+    requestAnimationFrame(readout)
+  }
+
+  try {
+    const mod = await import(`./${name}.js`)
+    meta = mod.meta
+    document.title = `${meta.name} · stage preview`
+    const theme = params.get("theme") || meta.theme
+    document.body.dataset.theme = theme
+    sizeHost()
+    stage = mod.mount(host)
+
+    const opening = document.createElement("button")
+    opening.type = "button"
+    opening.dataset.beat = "-1"
+    opening.textContent = "Still"
+    opening.onclick = () => go(-1)
+    $("beats").append(opening)
+    meta.beats.forEach((label, i) => {
+      const b = document.createElement("button")
+      b.type = "button"
+      b.dataset.beat = String(i)
+      b.textContent = `${i} ${label}`
+      b.onclick = () => go(i)
+      $("beats").append(b)
+    })
+    for (const w of [1120, 720, 390]) {
+      const b = document.createElement("button")
+      b.type = "button"
+      b.dataset.w = String(w)
+      b.textContent = String(w)
+      b.onclick = () => { width = w; sizeHost() }
+      $("widths").append(b)
+    }
+    $("prev").onclick = () => go(beat - 1)
+    $("next").onclick = () => go(beat + 1)
+    $("play").onclick = togglePlay
+    $("instant").onchange = () => setParam("instant", $("instant").checked ? "1" : null)
+    $("reduced").onchange = () => {
+      forceReduced($("reduced").checked)
+      setParam("reduced", $("reduced").checked ? "1" : null)
+    }
+    addEventListener("keydown", e => {
+      if (e.target.closest("input")) return
+      if (e.key === "ArrowRight") { e.preventDefault(); go(beat + 1) }
+      else if (e.key === "ArrowLeft") { e.preventDefault(); go(beat - 1) }
+      else if (e.key === " ") { e.preventDefault(); togglePlay() }
+    })
+
+    // ?beat=k plays act(k) from rest(k-1), so a film right after load shows
+    // the gesture. With instant, it jumps straight to rest(k).
+    const start = params.has("beat") ? Number(params.get("beat")) : -1
+    if (start >= 0) {
+      stage.set(start - 1, { instant: true })
+      beat = start - 1
+      go(start)
+    }
+    readout()
+    window.__stage = { stage, meta, go, get beat() { return beat } }
+  } catch (err) {
+    const box = document.createElement("div")
+    box.className = "error"
+    box.textContent = `Could not load ./${name}.js\n${err?.stack || err}`
+    document.body.append(box)
+    console.error(err)
+  }
+
+  function togglePlay() {
+    playing = !playing
+    playing ? stage.play() : stage.pause()
+    $("play").textContent = playing ? "Pause" : "Play"
+    readout()
+  }
+</script>
+</body>
+</html>

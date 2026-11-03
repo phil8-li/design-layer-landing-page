@@ -1,0 +1,1201 @@
+/*
+ * stagekit.css: tokens, looks and small parts for hand-built product demos
+ * ("stages"). Plain DOM port of the rules in Stageshow (benjitaylor/skills,
+ * MIT); token names mirror its --ss-* table with an --sk- prefix.
+ *
+ * Everything nests under .sk-stage so a stage can sit inside any page without
+ * the page's element rules reaching in, or the kit's reaching out. A product
+ * look (look-designlayer.css, look-appbuilder.css) sets only tokens.
+ */
+
+/* ---------- Tokens: light (default) ---------- */
+
+.sk-stage,
+.sk-stage [data-theme="light"] {
+  color-scheme: light;
+  --sk-canvas: #f4f4f3;
+  --sk-surface: #ffffff;
+  --sk-chrome: #f6f6f5;
+  --sk-well: #efefee;
+  --sk-raised: #ffffff;
+  --sk-line: rgb(0 0 0 / 0.1);
+  --sk-line-faint: rgb(0 0 0 / 0.06);
+  --sk-text-strong: #111113;
+  --sk-text: rgb(0 0 0 / 0.72);
+  --sk-text-faint: rgb(0 0 0 / 0.48);
+  --sk-icon: #5b5b60;
+  --sk-icon-faint: #9b9ba0;
+  --sk-accent: #2f6fed;
+  --sk-accent-soft: #e6eefd;
+  --sk-accent-text: #1f5ad1;
+  /* The fill of a primary button and the ink on it. Most products fill with
+     the accent; some (Luminous) fill with a pale tint and keep a dark label. */
+  --sk-accent-fill: var(--sk-accent);
+  --sk-on-accent: #ffffff;
+  --sk-success: #1f8a4c;
+  --sk-success-soft: #e3f4ea;
+  --sk-danger: #d93a32;
+  --sk-danger-soft: #fde7e5;
+  --sk-warning: #c77700;
+  --sk-warning-soft: #fdf0dc;
+  --sk-font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro", system-ui, sans-serif;
+  --sk-mono: ui-monospace, "SF Mono", Menlo, monospace;
+  --sk-text-size: 12px;
+  --sk-radius-sm: 6px;
+  --sk-radius-md: 8px;
+  --sk-radius-lg: 10px;
+  --sk-radius-window: 12px;
+  --sk-radius-pill: 999px;
+  --sk-control: 34px;
+  --sk-row: 26px;
+  /* Placeholder inks: the kit's, translucent so they sit on any surface. */
+  --sk-ink-1: rgb(0 0 0 / 0.05);
+  --sk-ink-2: rgb(0 0 0 / 0.08);
+  --sk-ink-3: rgb(0 0 0 / 0.11);
+  --sk-ink-4: rgb(0 0 0 / 0.16);
+  --sk-ink-5: rgb(0 0 0 / 0.24);
+  /* Shadows (framing.md, Recipes). The hero's is the one page shadow; the
+     satellite's is tighter because it falls on a white window, where a wide
+     blur smears; ground is a hairline and a long faint fall. */
+  --sk-shadow-hero: 0 0 0 0.5px rgb(0 0 0 / 0.12), 0 2px 4px rgb(0 0 0 / 0.04), 0 18px 48px -8px rgb(0 0 0 / 0.18);
+  --sk-shadow-window: 0 0 0 0.5px rgb(0 0 0 / 0.12), 0 8px 24px -6px rgb(0 0 0 / 0.14);
+  --sk-shadow-satellite: 0 0 0 0.5px rgb(0 0 0 / 0.1), 0 1px 2px rgb(0 0 0 / 0.06), 0 6px 14px -4px rgb(0 0 0 / 0.16);
+  --sk-shadow-ground: 0 0 0 0.5px rgb(0 0 0 / 0.08), 0 24px 48px -24px rgb(0 0 0 / 0.2);
+  --sk-shadow-float: 0 0 0 0.5px rgb(0 0 0 / 0.1), 0 10px 28px -6px rgb(0 0 0 / 0.2);
+  --sk-shadow-lift: 0 0 0 0.5px rgb(0 0 0 / 0.08), 0 16px 32px -8px rgb(0 0 0 / 0.26);
+  --sk-shadow-card: 0 0 0 0.5px rgb(0 0 0 / 0.08), 0 1px 3px rgb(0 0 0 / 0.06);
+  --sk-fade: 64px;
+  /* Glass for the browser window's chrome: three layers, each a step more
+     opaque (bar, omnibox, active tab), and the rim light along the top. */
+  --sk-glass-bar: rgb(255 255 255 / 0.62);
+  --sk-glass-omni: rgb(255 255 255 / 0.74);
+  --sk-glass-tab: rgb(255 255 255 / 0.86);
+  --sk-glass-rim: rgb(255 255 255 / 0.6);
+  --sk-glass-blur: blur(24px) saturate(1.6);
+  /* The color field under a glass window, and the dots that show its blur. */
+  --sk-field-a: #eef4fa;
+  --sk-field-b: #f6f7fb;
+  --sk-field-dot: rgb(40 60 100 / 0.09);
+  --sk-field-glow: rgb(120 170 255 / 0.35);
+  --sk-field-glow-2: rgb(255 200 120 / 0.25);
+  --sk-wash: #ffffff;
+}
+
+/* ---------- Tokens: dark ---------- */
+
+/* On dark, depth comes from a lighter surface; shadows only separate, so
+   they are a light hairline and a quiet fall. */
+.sk-stage[data-theme="dark"],
+.sk-stage [data-theme="dark"] {
+  color-scheme: dark;
+  --sk-canvas: #101011;
+  --sk-surface: #18181a;
+  --sk-chrome: #1d1d1f;
+  --sk-well: #26262a;
+  --sk-raised: #2a2a2e;
+  --sk-line: rgb(255 255 255 / 0.1);
+  --sk-line-faint: rgb(255 255 255 / 0.06);
+  --sk-text-strong: #f5f5f6;
+  --sk-text: rgb(255 255 255 / 0.74);
+  --sk-text-faint: rgb(255 255 255 / 0.5);
+  --sk-icon: #b4b4ba;
+  --sk-icon-faint: #74747a;
+  --sk-accent: #6d8cff;
+  --sk-accent-soft: rgb(109 140 255 / 0.18);
+  --sk-accent-text: #93a8ff;
+  --sk-on-accent: #ffffff;
+  --sk-success: #6cc07a;
+  --sk-success-soft: rgb(108 192 122 / 0.16);
+  --sk-danger: #ff6b6b;
+  --sk-danger-soft: rgb(255 107 107 / 0.16);
+  --sk-warning: #e6b04a;
+  --sk-warning-soft: rgb(230 176 74 / 0.16);
+  --sk-ink-1: rgb(255 255 255 / 0.05);
+  --sk-ink-2: rgb(255 255 255 / 0.08);
+  --sk-ink-3: rgb(255 255 255 / 0.12);
+  --sk-ink-4: rgb(255 255 255 / 0.17);
+  --sk-ink-5: rgb(255 255 255 / 0.25);
+  --sk-shadow-hero: 0 0 0 1px rgb(255 255 255 / 0.08), 0 24px 56px -12px rgb(0 0 0 / 0.6);
+  --sk-shadow-window: 0 0 0 1px rgb(255 255 255 / 0.07), 0 12px 32px -8px rgb(0 0 0 / 0.5);
+  --sk-shadow-satellite: 0 0 0 1px rgb(255 255 255 / 0.09), 0 6px 16px -4px rgb(0 0 0 / 0.55);
+  --sk-shadow-ground: 0 0 0 1px rgb(255 255 255 / 0.07), 0 24px 48px -24px rgb(0 0 0 / 0.6);
+  --sk-shadow-float: 0 0 0 1px rgb(255 255 255 / 0.09), 0 12px 28px -6px rgb(0 0 0 / 0.55);
+  --sk-shadow-lift: 0 0 0 1px rgb(255 255 255 / 0.09), 0 18px 36px -8px rgb(0 0 0 / 0.65);
+  --sk-shadow-card: 0 0 0 1px rgb(255 255 255 / 0.07), 0 1px 3px rgb(0 0 0 / 0.4);
+  --sk-glass-bar: rgb(30 30 32 / 0.55);
+  --sk-glass-omni: rgb(30 30 32 / 0.7);
+  --sk-glass-tab: rgb(30 30 32 / 0.85);
+  --sk-glass-rim: rgb(255 255 255 / 0.12);
+  --sk-field-a: #0a0b12;
+  --sk-field-b: #12162a;
+  --sk-field-dot: rgb(160 175 255 / 0.1);
+  --sk-field-glow: rgb(121 140 255 / 0.35);
+  --sk-field-glow-2: rgb(90 110 220 / 0.22);
+  --sk-wash: #000000;
+}
+
+/* ---------- The stage and its scene ---------- */
+
+.sk-stage {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  width: 100%;
+  font: 400 var(--sk-text-size) / 1.34 var(--sk-font);
+  color: var(--sk-text);
+  -webkit-font-smoothing: antialiased;
+  text-align: left;
+  user-select: none;
+}
+
+.sk-stage,
+.sk-stage *,
+.sk-stage *::before,
+.sk-stage *::after {
+  box-sizing: border-box;
+}
+
+/* Host element rules (margins on p, heading sizes) stop at the stage. Zero
+   specificity, so any class in a stage or the kit wins. */
+:where(.sk-stage) :where(div, span, p, ul, ol, li, button, kbd, input, figure) {
+  margin: 0;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  letter-spacing: inherit;
+}
+
+:where(.sk-stage) :where(button) {
+  border: 0;
+  background: none;
+  cursor: default;
+}
+
+.sk-scene {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+}
+
+/* The stage turns this on for one frame while it moves to a rest state at
+   once (mount, reduced motion), so no transition plays. */
+.sk-stage[data-sk-instant] *,
+.sk-stage[data-sk-instant] *::before,
+.sk-stage[data-sk-instant] *::after {
+  transition: none !important;
+}
+
+.sk-mono,
+.sk-code {
+  font-family: var(--sk-mono);
+  font-variant-ligatures: none;
+}
+
+.sk-num {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Window ---------- */
+
+.sk-window {
+  --sk-bar: 38px;
+  --sk-light: 12px;
+  --sk-light-gap: 8px;
+  position: absolute;
+  display: flex;
+  overflow: hidden;
+  border-radius: var(--sk-radius-window);
+  background: var(--sk-canvas);
+  box-shadow: var(--sk-shadow-window);
+  color: var(--sk-text);
+}
+
+.sk-window.sk-hero {
+  box-shadow: var(--sk-shadow-hero);
+}
+
+.sk-window-main {
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.sk-window-bar {
+  position: relative;
+  display: flex;
+  flex: none;
+  align-items: center;
+  height: var(--sk-bar);
+  border-bottom: 1px solid var(--sk-line-faint);
+  background: var(--sk-chrome);
+}
+
+/* The lights sit as far from the left edge as their center is from the top
+   (19px in a 38px bar), the same spot in every kind of window. */
+.sk-window-lights {
+  position: absolute;
+  left: calc(var(--sk-bar) / 2 - var(--sk-light) / 2);
+  top: calc(var(--sk-bar) / 2 - var(--sk-light) / 2);
+  display: flex;
+  gap: var(--sk-light-gap);
+}
+
+.sk-window-lights > span {
+  width: var(--sk-light);
+  height: var(--sk-light);
+  border-radius: 50%;
+  background: var(--c);
+  box-shadow: inset 0 0 0 0.5px rgb(0 0 0 / 0.16);
+}
+
+.sk-window-lights > span:nth-child(1) { --c: #ff5f57; }
+.sk-window-lights > span:nth-child(2) { --c: #febc2e; }
+.sk-window-lights > span:nth-child(3) { --c: #28c840; }
+
+.sk-window-title {
+  flex: 1;
+  overflow: hidden;
+  padding: 0 84px;
+  color: var(--sk-text-strong);
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.sk-window-pill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: min(46%, 420px);
+  height: 24px;
+  margin: 0 auto;
+  padding: 0 12px;
+  border-radius: 7px;
+  background: var(--sk-well);
+  color: var(--sk-text-faint);
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.sk-window-body {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--sk-canvas);
+}
+
+/* A sidebar app: the sidebar runs the full height and holds the lights; the
+   content column is the surface and its title sits at the column's 16px inset. */
+.sk-window-side {
+  position: relative;
+  flex: none;
+  padding-top: var(--sk-bar);
+  border-right: 1px solid var(--sk-line-faint);
+  background: var(--sk-canvas);
+}
+
+.sk-window[data-sidebar] .sk-window-bar {
+  border-bottom-color: transparent;
+  background: var(--sk-surface);
+}
+
+.sk-window[data-sidebar] .sk-window-body {
+  background: var(--sk-surface);
+}
+
+.sk-window[data-sidebar] .sk-window-title {
+  padding: 0 16px;
+  text-align: left;
+}
+
+/* ---------- Browser window: Google Chrome for macOS, glass chrome ---------- */
+
+/* Proportions from a 2x capture of Chrome on macOS at 1440 wide: a 40px tab
+   strip, a 40px toolbar, tab content centered about 20px from the top, 16px
+   favicons, 13px titles. The chrome stays this size at any body scale. The
+   window has no fill of its own, so the chrome's backdrop is the field behind
+   the window; only the body is solid. */
+.sk-bwin {
+  --sk-bwin-tabs: 40px;
+  --sk-bwin-toolbar: 40px;
+  --sk-bwin-radius: 12px;
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: var(--sk-bwin-radius);
+  box-shadow: var(--sk-shadow-hero);
+  color: var(--sk-text-strong);
+  font-family: var(--sk-font);
+}
+
+.sk-bwin-chrome {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  height: calc(var(--sk-bwin-tabs) + var(--sk-bwin-toolbar));
+  background: var(--sk-glass-bar);
+  -webkit-backdrop-filter: var(--sk-glass-blur);
+  backdrop-filter: var(--sk-glass-blur);
+  /* Rim light along the top edge, a hairline where the page starts. */
+  box-shadow: inset 0 1px 0 var(--sk-glass-rim), inset 0 -1px 0 var(--sk-line);
+}
+
+.sk-bwin-glyph {
+  display: block;
+  flex: none;
+  width: 18px;
+  height: 18px;
+  max-width: none;
+  fill: currentColor;
+}
+
+.sk-bwin-tabs {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  height: var(--sk-bwin-tabs);
+  padding-left: 80px;
+}
+
+/* Centered 19px from the left and 20px from the top, on the tabs' line. */
+.sk-bwin-lights {
+  position: absolute;
+  left: 13px;
+  top: 14px;
+  display: flex;
+  gap: 8px;
+}
+
+.sk-bwin-lights > span {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--c);
+  box-shadow: inset 0 0 0 0.5px rgb(0 0 0 / 0.16);
+}
+
+.sk-bwin-lights > span:nth-child(1) { --c: #ff5f57; }
+.sk-bwin-lights > span:nth-child(2) { --c: #febc2e; }
+.sk-bwin-lights > span:nth-child(3) { --c: #28c840; }
+
+/* The active tab: rounded top corners and the outward flares at its foot
+   that Chrome draws where the tab meets the toolbar. */
+.sk-bwin-tab {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 240px;
+  height: 34px;
+  padding: 0 8px 4px 12px;
+  border-radius: 10px 10px 0 0;
+  background: var(--sk-glass-tab);
+  color: var(--sk-text-strong);
+  font-size: 13px;
+  line-height: 16px;
+}
+
+.sk-bwin-tab::before,
+.sk-bwin-tab::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  width: 10px;
+  height: 10px;
+}
+
+.sk-bwin-tab::before {
+  left: -10px;
+  background: radial-gradient(circle at 0 0, transparent 9.5px, var(--sk-glass-tab) 10px);
+}
+
+.sk-bwin-tab::after {
+  right: -10px;
+  background: radial-gradient(circle at 100% 0, transparent 9.5px, var(--sk-glass-tab) 10px);
+}
+
+.sk-bwin-fav {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  color: var(--sk-icon);
+}
+
+.sk-bwin-fav > img,
+.sk-bwin-fav > svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+  max-width: none;
+}
+
+.sk-bwin-tab-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  mask-image: linear-gradient(to right, #000 calc(100% - 16px), transparent);
+}
+
+.sk-bwin-tab-close {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  color: var(--sk-icon);
+}
+
+.sk-bwin-tab-close > .sk-bwin-glyph {
+  width: 14px;
+  height: 14px;
+}
+
+.sk-bwin-new {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  margin: 0 0 7px 14px;
+  color: var(--sk-icon);
+}
+
+.sk-bwin-bar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: var(--sk-bwin-toolbar);
+  padding: 0 8px;
+}
+
+.sk-bwin-btn {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  color: var(--sk-icon);
+}
+
+.sk-bwin-btn:nth-child(2) {
+  color: var(--sk-icon-faint);
+}
+
+.sk-bwin-url {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  height: 32px;
+  margin: 0 4px 0 6px;
+  padding: 0 14px 0 6px;
+  border-radius: var(--sk-radius-pill);
+  background: var(--sk-glass-omni);
+  color: var(--sk-text-strong);
+  font-size: 13px;
+  line-height: 16px;
+}
+
+.sk-bwin-url-site {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  color: var(--sk-icon);
+}
+
+.sk-bwin-url-site > .sk-bwin-glyph {
+  width: 16px;
+  height: 16px;
+}
+
+.sk-bwin-url-text {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.sk-bwin-body {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: 0 0 var(--sk-bwin-radius) var(--sk-bwin-radius);
+  background: var(--sk-surface);
+}
+
+/* ---------- Color field under glass ---------- */
+
+/* A quiet diagonal field for the stage ground. The faint dot grid is what
+   the glass chrome visibly frosts at the window's edges; a smooth gradient
+   blurred looks the same as unblurred. Set --sk-field-dot: transparent to
+   drop it. Named sk-colorfield because .sk-field is the text field. */
+.sk-colorfield {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle, var(--sk-field-dot) 1px, transparent 1.5px) 0 0 / 16px 16px,
+    radial-gradient(60% 50% at 20% 0%, var(--sk-field-glow, transparent), transparent 70%),
+    radial-gradient(50% 40% at 90% 10%, var(--sk-field-glow-2, transparent), transparent 70%),
+    linear-gradient(135deg, var(--sk-field-a), var(--sk-field-b));
+}
+
+/* ---------- Screenshot layers, wash, lifted unit ---------- */
+
+.sk-shots {
+  position: absolute;
+  inset: 0;
+}
+
+.sk-shot {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: cover;
+  object-position: top center;
+  opacity: 0;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.sk-shot[data-on] {
+  opacity: 1;
+}
+
+.sk-shot[data-top] {
+  z-index: 1;
+}
+
+.sk-wash {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: var(--sk-wash);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 320ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sk-stage [data-lifted] {
+  z-index: 15;
+}
+
+/* ---------- Placeholder bars ---------- */
+
+.sk-bar {
+  display: block;
+  flex: none;
+  width: var(--w, 60%);
+  max-width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--ink, var(--sk-ink-3));
+}
+
+/* A bar keeps the line box of the 12px text it replaces, so a skeleton row
+   has the real row's pitch (16px line, 8px bar centered in it). */
+.sk-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-block: 4px;
+}
+
+/* ---------- Icons (filled from the product's own set, never drawn here) ---------- */
+
+.sk-icon {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  color: var(--sk-icon);
+  overflow: hidden;
+}
+
+/* A sprite's root fill/stroke does not reach a symbol drawn through <use>,
+   so the kit sets the Design Layer sprite's line style here. */
+svg.sk-icon {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.sk-icon.faint {
+  color: var(--sk-icon-faint);
+}
+
+/* ---------- Rows and lists ---------- */
+
+.sk-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 4px;
+}
+
+.sk-row {
+  display: grid;
+  grid-template-columns: [lead] auto [main] minmax(0, 1fr) [trail] auto;
+  align-items: center;
+  min-height: var(--sk-row);
+  padding: 0 12px;
+  border-radius: var(--sk-radius-sm);
+  color: var(--sk-text);
+  transition: background-color 120ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Anything not marked lead or trail is the row's content. */
+.sk-row > :not(.sk-row-lead, .sk-row-trail) {
+  grid-column: main;
+}
+
+.sk-row.dense {
+  padding: 0 8px;
+}
+
+/* Two lines: the title sits 4 to 6px over its subtitle; the air comes from
+   the row's padding. */
+.sk-row:has(.sk-row-sub) {
+  padding-block: 8px;
+}
+
+.sk-row-lead {
+  grid-column: lead;
+  display: flex;
+  align-items: center;
+  margin-right: 8px;
+}
+
+.sk-row-main {
+  grid-column: main;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.sk-row-title {
+  overflow: hidden;
+  color: var(--sk-text-strong);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.sk-row-sub {
+  overflow: hidden;
+  color: var(--sk-text-faint);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.sk-row-main > .sk-bar {
+  margin-block: 4px;
+}
+
+.sk-row-trail {
+  grid-column: trail;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 8px;
+  color: var(--sk-text-faint);
+}
+
+.sk-row[data-hover] {
+  background: var(--sk-ink-1);
+}
+
+.sk-row[data-selected],
+.sk-row[aria-selected="true"] {
+  background: var(--sk-accent-soft);
+}
+
+/* ---------- Avatar ---------- */
+
+.sk-avatar {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--c, var(--sk-ink-3));
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  text-box: trim-both cap alphabetic;
+}
+
+.sk-avatar.sm { width: 20px; height: 20px; font-size: 10px; }
+.sk-avatar.lg { width: 28px; height: 28px; font-size: 12px; }
+
+/* ---------- Button ---------- */
+
+.sk-btn {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 12px;
+  border-radius: var(--sk-radius-md);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  transition: background-color 120ms cubic-bezier(0.4, 0, 0.2, 1), box-shadow 120ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sk-btn.primary {
+  background: var(--sk-accent-fill);
+  color: var(--sk-on-accent);
+}
+
+/* Under the pointer a filled button keeps its color: one step darker. */
+.sk-btn.primary[data-press],
+.sk-btn.primary[data-hover] {
+  background: color-mix(in srgb, #000 12%, var(--sk-accent-fill));
+}
+
+.sk-btn.secondary {
+  background: var(--sk-surface);
+  color: var(--sk-text-strong);
+  box-shadow: inset 0 0 0 1px var(--sk-line);
+}
+
+.sk-btn.secondary[data-press],
+.sk-btn.secondary[data-hover] {
+  background: color-mix(in srgb, var(--sk-text-strong) 6%, var(--sk-surface));
+}
+
+.sk-btn.ghost {
+  color: var(--sk-text-strong);
+}
+
+.sk-btn.ghost[data-press],
+.sk-btn.ghost[data-hover] {
+  background: var(--sk-ink-2);
+}
+
+.sk-btn.pill {
+  border-radius: var(--sk-radius-pill);
+}
+
+/* ---------- Field ---------- */
+
+.sk-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: var(--sk-control);
+  padding: 0 10px;
+  border-radius: var(--sk-radius-md);
+  background: var(--sk-well);
+  box-shadow: inset 0 0 0 1px var(--sk-line-faint);
+  color: var(--sk-text-strong);
+  transition: box-shadow 120ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* The focus ring is a shadow so it never moves the text. */
+.sk-field[data-focus] {
+  box-shadow: inset 0 0 0 1px var(--sk-accent), 0 0 0 3px var(--sk-accent-soft);
+}
+
+.sk-field-text {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  min-width: 0;
+  overflow: hidden;
+  white-space: pre;
+  text-box: trim-both cap alphabetic;
+}
+
+.sk-field-text:empty::before,
+.sk-field-text[data-placeholder]:not(:has(*)):empty::before {
+  content: attr(data-placeholder);
+  color: var(--sk-text-faint);
+}
+
+/* ---------- Caret ---------- */
+
+.sk-caret {
+  display: inline-block;
+  flex: none;
+  width: 1.5px;
+  height: 1.25em;
+  margin: 0 0 0 1px;
+  border-radius: 1px;
+  background: var(--sk-caret, var(--sk-accent));
+  vertical-align: -0.25em;
+  animation: sk-blink 1.06s steps(1) infinite;
+}
+
+/* Solid while letters land; it blinks only at rest. */
+.sk-caret[data-typing] {
+  animation: none;
+}
+
+@keyframes sk-blink {
+  0%, 50% { opacity: 1; }
+  50.01%, 100% { opacity: 0; }
+}
+
+/* ---------- Menu ---------- */
+
+.sk-menu {
+  display: flex;
+  flex-direction: column;
+  min-width: 160px;
+  padding: 4px;
+  border-radius: var(--sk-radius-lg);
+  background: var(--sk-raised);
+  box-shadow: var(--sk-shadow-float);
+}
+
+.sk-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: var(--sk-row);
+  padding: 0 8px;
+  border-radius: var(--sk-radius-sm);
+  color: var(--sk-text-strong);
+  white-space: nowrap;
+}
+
+.sk-menu-item > .sk-menu-hint {
+  margin-left: auto;
+  padding-left: 16px;
+  color: var(--sk-text-faint);
+}
+
+.sk-menu-item[data-hover],
+.sk-menu-item[data-press] {
+  background: var(--sk-ink-2);
+}
+
+.sk-menu-sep {
+  height: 1px;
+  margin: 4px 8px;
+  background: var(--sk-line-faint);
+}
+
+/* ---------- Toggle ---------- */
+
+.sk-toggle {
+  position: relative;
+  display: inline-block;
+  flex: none;
+  width: 28px;
+  height: 16px;
+  border-radius: 8px;
+  background: var(--sk-ink-4);
+  transition: background-color 160ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sk-toggle::after {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.25);
+  transition: translate 160ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sk-toggle[data-on] {
+  background: var(--sk-accent);
+}
+
+.sk-toggle[data-on]::after {
+  translate: 12px 0;
+}
+
+/* ---------- Tabs ---------- */
+
+.sk-tabs {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.sk-tab {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: var(--sk-radius-sm);
+  color: var(--sk-text);
+  white-space: nowrap;
+  transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1), color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sk-tab[data-selected],
+.sk-tab[aria-selected="true"] {
+  background: var(--sk-ink-2);
+  color: var(--sk-text-strong);
+  font-weight: 500;
+}
+
+/* ---------- Badge and chip ---------- */
+
+.sk-badge {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 4px;
+  height: 18px;
+  padding: 0 7px;
+  border-radius: var(--sk-radius-pill);
+  background: var(--sk-accent-soft);
+  color: var(--sk-accent-text);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.sk-badge[data-tone="success"] { background: var(--sk-success-soft); color: var(--sk-success); }
+.sk-badge[data-tone="danger"] { background: var(--sk-danger-soft); color: var(--sk-danger); }
+.sk-badge[data-tone="warning"] { background: var(--sk-warning-soft); color: var(--sk-warning); }
+.sk-badge[data-tone="neutral"] { background: var(--sk-ink-2); color: var(--sk-text); }
+
+.sk-chip {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: var(--sk-radius-pill);
+  background: var(--sk-surface);
+  box-shadow: inset 0 0 0 1px var(--sk-line);
+  color: var(--sk-text-strong);
+  white-space: nowrap;
+}
+
+/* ---------- Keycaps ---------- */
+
+/* The host page's key pill (styles.css .cue-key kbd): a dark cap, a light
+   hairline, white letters. A keyboard beat shows them in .sk-keys. */
+.sk-keys {
+  position: absolute;
+  left: 50%;
+  bottom: 20px;
+  z-index: 20;
+  display: flex;
+  gap: 4px;
+  translate: -50% 6px;
+  opacity: 0;
+  transition: opacity 160ms cubic-bezier(0.4, 0, 0.2, 1), translate 240ms cubic-bezier(0.25, 0.8, 0.25, 1);
+  pointer-events: none;
+}
+
+.sk-keys[data-show] {
+  translate: -50% 0;
+  opacity: 1;
+}
+
+.sk-keycap {
+  display: inline-grid;
+  place-items: center;
+  min-width: 26px;
+  height: 26px;
+  padding: 0 7px;
+  border: 1px solid rgb(255 255 255 / 0.16);
+  border-radius: 7px;
+  background: #262626;
+  box-shadow: 0 6px 16px rgb(0 0 0 / 0.28), inset 0 -1px 0 rgb(0 0 0 / 0.5);
+  color: #fafafa;
+  font: 600 13px / 1 var(--sk-font);
+  transition: translate 90ms cubic-bezier(0.4, 0, 0.2, 1), background-color 90ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sk-keycap + .sk-keycap {
+  margin-left: 4px;
+}
+
+.sk-keys .sk-keycap + .sk-keycap {
+  margin-left: 0;
+}
+
+.sk-keycap[data-press] {
+  translate: 0 1px;
+  background: #1c1c1c;
+}
+
+/* ---------- Cursor ---------- */
+
+/* The element's origin is the hotspot: each glyph is placed so its point (the
+   arrow's tip, the hand's fingertip, the I-beam's middle) sits on 0,0. */
+.sk-cursor {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 30;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 240ms cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+
+.sk-cursor[data-show] {
+  opacity: 1;
+}
+
+/* Rested: fade after 4s; a move takes the attribute off. */
+.sk-cursor[data-show][data-idle] {
+  opacity: 0;
+  transition-duration: 600ms;
+}
+
+.sk-cursor-press {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+  transition: scale 90ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sk-cursor[data-press] .sk-cursor-press {
+  scale: 0.92;
+}
+
+.sk-cursor-glyph {
+  position: absolute;
+  display: block;
+  /* The cursor box is 0 × 0, so a host rule like `svg { max-width: 100% }` would collapse the glyph. */
+  max-width: none;
+  max-height: none;
+  opacity: 0;
+  scale: 0.8;
+  filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.35));
+  transition: opacity 120ms cubic-bezier(0.4, 0, 0.2, 1), scale 120ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sk-cursor[data-kind="arrow"] .sk-cursor-glyph.arrow,
+.sk-cursor[data-kind="hand"] .sk-cursor-glyph.hand,
+.sk-cursor[data-kind="ibeam"] .sk-cursor-glyph.ibeam {
+  opacity: 1;
+  scale: 1;
+}
+
+.sk-cursor-glyph.arrow { left: -3.5px; top: -3px; width: 22px; height: 28px; transform-origin: 3.5px 3px; }
+.sk-cursor-glyph.hand { left: -7.5px; top: -2px; width: 22px; height: 26px; transform-origin: 7.5px 2px; }
+.sk-cursor-glyph.ibeam { left: -5px; top: -12px; width: 10px; height: 24px; transform-origin: 5px 12px; }
+
+/* The I-beam is dark with a light edge on light stages, white with a dark edge
+   on dark ones; the arrow and hand stay macOS black-with-white. */
+.sk-cursor .ibeam .edge { stroke: #fff; }
+.sk-cursor .ibeam .ink { stroke: #111; }
+.sk-stage[data-theme="dark"] .sk-cursor .ibeam .edge { stroke: #111; }
+.sk-stage[data-theme="dark"] .sk-cursor .ibeam .ink { stroke: #fff; }
+
+/* ---------- Masks, satellites, leaders ---------- */
+
+.sk-fade-b {
+  mask-image: linear-gradient(to bottom, #000 calc(100% - var(--sk-fade)), transparent);
+}
+
+.sk-fade-r {
+  mask-image: linear-gradient(to right, #000 calc(100% - var(--sk-fade)), transparent);
+}
+
+.sk-satellite {
+  position: absolute;
+  z-index: 10;
+  border-radius: var(--sk-radius-lg);
+  background: var(--sk-raised);
+  box-shadow: var(--sk-shadow-satellite);
+  color: var(--sk-text);
+}
+
+/* A 1px leader that ends on a 4px dot: place it at its start, give --len and
+   an optional --angle. */
+.sk-leader {
+  position: absolute;
+  width: var(--len, 40px);
+  height: 1px;
+  background: var(--sk-leader, var(--sk-text-faint));
+  transform-origin: 0 50%;
+  rotate: var(--angle, 0deg);
+}
+
+.sk-leader::after {
+  content: "";
+  position: absolute;
+  right: -2px;
+  top: -1.5px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: inherit;
+}
+
+/* ---------- Labels center on their letters ---------- */
+
+/* Capitals sit low in a plain line box, so a label in a pill, button or cap
+   is trimmed to cap height and baseline where the browser supports it. */
+.sk-btn,
+.sk-badge,
+.sk-chip,
+.sk-tab,
+.sk-keycap,
+.sk-menu-item {
+  text-box: trim-both cap alphabetic;
+}
+
+/* ---------- Reduced motion ---------- */
+
+/* The kit's own transitions stop; the stage shows rest states at once. */
+@media (prefers-reduced-motion: reduce) {
+  .sk-stage *,
+  .sk-stage *::before,
+  .sk-stage *::after {
+    transition: none !important;
+  }
+
+  .sk-caret {
+    animation: none;
+  }
+}
+
+:root[data-sk-reduced] .sk-stage *,
+:root[data-sk-reduced] .sk-stage *::before,
+:root[data-sk-reduced] .sk-stage *::after {
+  transition: none !important;
+}
+
+:root[data-sk-reduced] .sk-caret {
+  animation: none;
+}

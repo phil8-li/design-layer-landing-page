@@ -1,0 +1,95 @@
+/*
+ * board: "Every page on one board. One click back to live." Scoped under .bd.
+ * Bare capture: the screen fills the scene; the live page is one layer that
+ * travels by transform and fades by opacity, nothing else. The hover (ring
+ * and Live badge) sits on the capture's own frame, not on the layer.
+ */
+
+.bd .sk-screen {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+/* The page layer: opacity is its only transition (a jump's 300ms fade); its
+   trips belong to Web Animations. */
+.bd .bd-page {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 3;
+  opacity: 0;
+  transform-origin: 0 0;
+  pointer-events: none;
+  transition: opacity 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.bd .bd-clip {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.bd .bd-clip img { display: block; }
+
+/* The hovered frame: the accent ring and the Live badge, both opacity only. */
+.bd .bd-hot {
+  position: absolute;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.bd .bd-ring {
+  position: absolute;
+  inset: -1px;
+  border-radius: 1px;
+  box-shadow: 0 0 0 1.5px var(--sk-accent);
+  opacity: 0;
+  transition: opacity 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* The editor's Live badge: play glyph and "Live", top-right of the frame,
+   drawn in capture px and scaled by --bk. */
+.bd .bd-live {
+  position: absolute;
+  top: calc(8px * var(--bk));
+  right: calc(8px * var(--bk));
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 22px;
+  padding: 0 8px 0 6px;
+  border-radius: 11px;
+  background: rgb(18 22 26 / 0.82);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  transform: scale(var(--bk));
+  transform-origin: 100% 0;
+  opacity: 0;
+  transition: opacity 150ms cubic-bezier(0.4, 0, 0.2, 1), background-color 120ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.bd .bd-live > span { text-box: trim-both cap alphabetic; }
+.bd .bd-live .sk-icon { width: 11px; height: 11px; color: #fff; }
+.bd .bd-hot[data-hover] .bd-ring,
+.bd .bd-hot[data-hover] .bd-live { opacity: 1; }
+.bd .bd-live[data-press] { background: rgb(18 22 26 / 0.96); }
+
+/* The toolbar slice: still, over the travelling page. Hero's stays opaque;
+   canvas's fades over it. */
+.bd .bd-tools {
+  position: absolute;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.bd .bd-tool { position: absolute; inset: 0; overflow: hidden; }
+.bd .bd-tool-canvas { opacity: 0; transition: opacity 300ms cubic-bezier(0.4, 0, 0.2, 1); }
+.bd .bd-tool-canvas[data-on] { opacity: 1; }
+
+/* ⇧1 centered at the bottom as the kit draws it, raised just enough to
+   clear the editor toolbar it would otherwise sit on. */
+.bd .bd-keys { bottom: 46px; }
+.bd[data-layout="compact"] .bd-keys { bottom: 30px; }

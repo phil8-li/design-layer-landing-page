@@ -176,21 +176,21 @@ the older line in place, so the file never holds two answers for one property.
 ## Overview
 
 The page sells a visual editor by showing it. The canvas is pure black so the
-headline and the real product shots carry the page. Each section teaches one
+headline, the real hero shot and the built product demos carry the page. Each section teaches one
 capability on top of the hero's promise, and the explanation lives inside the
 picture. The tone is calm and technical: one accent, sans-serif headlines,
 frosted chrome with no shadows, and motion that moves as one continuous camera.
 
 ## Colors
 
-Source: `styles.css:31-45` (`:root`), `:303` and `:307` (primary
-button), `:354` (nav frost), `:609`, `:690`, `:695` (pill and its states),
-`:659-660` (sticker).
+Source: `styles.css:24-38` (`:root`), `:296` and `:300` (primary
+button), `:347` (nav frost), `:602`, `:683`, `:688` (pill and its states),
+`:652-653` (sticker).
 
 - **Canvas (`canvas` #000):** pure black, no tint, no ambient light.
 - **Indigo (`primary`, `primary-fill`, `primary-text`):** the only hue the page
   adds. Tinted light, glows and WebGL backgrounds use these. `primary-glow` is
-  the no-WebGL fallback glow behind the hero (`styles.css:462-475`); with
+  the no-WebGL fallback glow behind the hero (`styles.css:455-468`); with
   WebGL the blinds replace it.
 - **Ink (`ink` #fafafa, `ink-2` #a1a1aa, `ink-3` #8a8a93):** text, secondary
   text, dim text.
@@ -206,9 +206,9 @@ button), `:354` (nav frost), `:609`, `:690`, `:695` (pill and its states),
 
 ## Typography
 
-Source: `styles.css:3-24` (faces), `:47-49` (stacks), `:86-89` (body),
-`:562-568` (h1), `:1214-1219` (h2), `:1485-1490` (facts), `:1531-1535` (card
-title), `:243-244` (button).
+Source: `styles.css:3-17` (faces), `:40-42` (stacks), `:79-82` (body),
+`:555-561` (h1), `:1161-1166` (h2), `:1358-1363` (facts), `:1404-1408` (card
+title), `:236-237` (button).
 
 Headlines are Instrument Sans; the body is Inter with `cv11` and `ss01`. Display
 sizes are fluid in the stylesheet; the tokens hold the maximum:
@@ -219,12 +219,12 @@ sizes are fluid in the stylesheet; the tokens hold the maximum:
 | headline (h2) | `clamp(30px, 3.6vw, 50px)` |
 | stat | `clamp(30px, 3.6vw, 44px)` |
 
-Hedvig Letters Serif is loaded only for the direct-edit demo's live retype (the
-demo app's own font), never for the page's voice.
+Hedvig Letters Serif is loaded only by the feature stages, for the demo app's
+headline (the app's own font), never for the page's voice.
 
 ## Layout
 
-Source: `styles.css:51-58`.
+Source: `styles.css:44-51`.
 
 Content sits in a 1120px wrap (1240px wide), with a fluid gutter
 (`clamp(20px, 4vw, 40px)`) and fluid section padding
@@ -234,15 +234,15 @@ rules; see Do's and Don'ts, Story.
 ## Elevation & Depth
 
 The page is flat. Depth comes from the product shots and frosted glass
-(`--frost: blur(18px) saturate(1.6)`, `styles.css:62`) on the nav and the
+(`--frost: blur(18px) saturate(1.6)`, `styles.css:55`) on the nav and the
 footer's links row, never from shadows on chrome. The primary button glows on
 hover outside the nav (`0 8px 28px -10px rgb(255 255 255 / 0.5)`,
-`styles.css:308`); inside the nav it does not.
+`styles.css:301`); inside the nav it does not.
 
 ## Shapes
 
-Source: `styles.css:56-59`, `:611`, `:2804` and `:2863` (8px),
-`:2821` and `:2898` (6px).
+Source: `styles.css:49-52`, `:604`, `:2281` and `:2340` (8px),
+`:2298` and `:2375` (6px).
 
 - `control` 10px: buttons. `shot` 14px: product shots. `frame` 20px: a framed
   shot or card, equal to `shot` plus the 6px `frame-inset`, so the two corners
@@ -263,8 +263,8 @@ Source: `styles.css:56-59`, `:611`, `:2804` and `:2863` (8px),
 - **Nav:** frosted `nav-frost` fill with no shadow or rule below it.
 - **Footer inspector:** a 40px color wheel of 24px swatches under a fixed frame,
   and 40px sliders with a 24 × 32 thumb. The slider fill is a gradient from
-  `primary-fill` to `primary` (`styles.css:2877`); the token holds its first stop.
-- **Motion** (`styles.css:64-66`): `--ease-out` cubic-bezier(0.23, 1, 0.32, 1),
+  `primary-fill` to `primary` (`styles.css:2354`); the token holds its first stop.
+- **Motion** (`styles.css:57-59`): `--ease-out` cubic-bezier(0.23, 1, 0.32, 1),
   `--ease-in-out` cubic-bezier(0.77, 0, 0.175, 1), `--ease-hover`
   cubic-bezier(0.4, 0, 0.2, 1). Under reduced motion, or without script or
   WebGL, every scene rests in its final frame (`AGENTS.md`).
@@ -295,11 +295,12 @@ and the check that enforces it when one exists.
 
 - Get started: the two cards are twins. Each opens on a picture of one width (250px) and similar height (about 90px and 66px): for In your browser, a browser window kept simple (window buttons and a `localhost:3000` tab; inside, an empty page with a dashed "Your app" placeholder that turns into Design Layer's solid indigo outline as the section arrives, no other content); for As a Mac app, only the Dock: Figma, Sketch, Design Layer (third) and Terminal. Then a title, one line and the commands. Scope: index.html `#start`, styles.css `.mini-window`, `.mini-dock`. Source: Phil, 2026-10-07.
 - Section order: after the hero comes Design like Figma, then the design system, then the board, then working with an agent, then the rest. Each section teaches one more capability on top of the hero's promise; there is no section between the hero and Design like Figma. Scope: index.html. Source: Phil, 2026-10-05.
-- A tabbed section only holds tabs that prove its headline. A feature that serves another section's promise moves there (Design options lives in the agent section as Compare); one that serves none is cut (Shortcuts, Responsive, Light theme and Live preview left Design like Figma). Scope: index.html. Source: Phil, 2026-10-05.
+- A tabbed section only holds tabs that prove its headline. A feature that serves another section's promise moves there (Design options lives in the agent section as Compare); one that serves none is cut (Shortcuts, Responsive, Light theme, Live preview and, on 2026-11-03, Hide Design Layer left Design like Figma). Scope: index.html. Source: Phil, 2026-10-05.
 - Headlines name the value plainly; no contrast phrases that need decoding ("Not ours" was cut). Scope: index.html. Source: Phil, 2026-10-05.
-- Explanations live inside the visual, never as text beneath it: show the key, gesture or outcome on the shot itself (a key pill where it is pressed, a pointer and click ripple on what it clicks, a note pinned where it applies, a terminal for what the agent receives). No caption line under a frame. Scope: every feature section in index.html. Source: Phil, 2026-10-05 (said twice). Checked by `node check.mjs --only static` ("no caption text under a feature visual").
-- Direct edit types for real: the double-click selects a word, then each letter lands one at a time with a caret, set live in the demo app's own font so the line rewraps as the app did. No crossfade between before and after shots stands in for typing. Scope: index.html `#edit`, main.js `setupTypeEdit`. Source: Phil, 2026-10-05.
-- Transitions are one continuous move: the hero's mock lands straight in Design like Figma's frame (no hold, no bigger-then-shrink step), and the design-system tabs share one camera that glides between panels instead of backing out. Scope: index.html, main.js (`handOff`, the switcher's `aim`). Source: Phil, 2026-10-05 (said three times).
+- Explanations live inside the visual, never as text beneath it: the stage draws the key, gesture or outcome itself (a keycap where it is pressed, a cursor on what it clicks, a note pinned where it applies, a terminal satellite for what the agent receives). No caption line under a frame. Each beat holds one stretch of pinned scroll (`--stretch`, 130vh; it was 55vh, then 90vh, on 2026-11-03, when Phil could still scroll past the gestures) and a beat whose gesture needs reading time takes more (`data-weights` on the tablist: Align 2, the typing and picking beats 1.5), so a fast scroll does not skip the moment. Scope: every feature section in index.html. Source: Phil, 2026-10-05 (said twice). Checked by `node check.mjs --only static` ("no caption text under a feature visual").
+- Direct edit types for real: the double-click selects a word, then each letter lands one at a time with a caret, set in the demo app's own serif so the line rewraps as the app does. No crossfade between before and after pictures stands in for typing. Scope: index.html `#edit`, stages/edit.js. Source: Phil, 2026-10-05.
+- Transitions are one continuous move: the hero's mock lands straight on Design like Figma's stage (no hold, no bigger-then-shrink step), which is the same capture at the same rect, so the picture never changes; only the mock's rim fades away. In the design-system stage the inspector's lifted panel stays in place and only its content swaps per tab; there is no camera. Scope: index.html, main.js (`hero.measure`, `handOff`), stages/edit.js, stages/system.js. Source: Phil, 2026-10-05 (said three times); the stage medium, 2026-11-02.
+- Feature demos show the real product and direct the eye: each stage (`stages/`) is the real editor capture itself, bare on the black page with the shot's own corners (no frame, no rim, no browser chrome, no field), and the one unit the beat is about built in DOM at its real size with the capture's real content, lifted in place — it grows out of its own position and covers its source, never moves to another part of the screen and never shows a second copy — while the rest of the screen steps back under a 30% wash; the gesture happens on the lifted unit; one unit lifted at a time; one beat per tab; a poster image of the payoff for no script. Scope: index.html feature sections, main.js `setupStages`, styles.css (`.frame:has(> .frame-view > .stage)`), stages/, stages/README.md ("Real-UI stage"). Source: Phil, 2026-11-02 ("show the real UI"; then "remove the Chrome browser, make the background cleaner, remove the background container; don't move UI from the right panel to the middle and duplicate it"), replacing the same day's cropped stages and glass windows.
 
 ### Copy
 
@@ -336,7 +337,7 @@ and the check that enforces it when one exists.
   hold, so the rule waits on Phil.
 - The linter accepts `color-mix()` only in srgb, so `pill`, `pill-hover` and
   `pill-active` hold the sRGB result of the stylesheet's oklab mix
-  (`styles.css:609`, `:690`, `:695`). Recompute them when `--accent-fill`
+  (`styles.css:602`, `:683`, `:688`). Recompute them when `--accent-fill`
   changes.
 - One-off colors stay in the stylesheet: the secondary button's 3% and 7%
   white fills and 24% hover border, the Code-demo syntax tints (for example

@@ -1,0 +1,120 @@
+/*
+ * The App builder's look (Luminous light) on stagekit tokens. Values are the
+ * Luminous light roles in shippable-landing/shared/tokens.css. The chrome it
+ * stands for: a left icon rail, a thread column and a canvas, 13 to 14px
+ * text, elevation as a glow with no stroke, and the committing button as a
+ * light-blue (#9dd2ff) pill whose label stays black.
+ *
+ * Use: <div class="look-appbuilder"> with meta.theme "light". Icons are
+ * Material Symbols Rounded, loaded by the host page from Google Fonts: write
+ * <span class="sk-icon material-symbols-rounded">add</span>.
+ */
+
+.look-appbuilder.sk-stage,
+.look-appbuilder.sk-stage[data-theme] {
+  color-scheme: light;
+  --sk-canvas: #f2f0f0;                 /* surface-dim: the rail and side column */
+  --sk-surface: #fdfcfc;                /* surface: the thread */
+  --sk-chrome: #f2f0f0;
+  --sk-well: #f2f0f0;                   /* cards in the thread, the user's bubble */
+  --sk-raised: #ffffff;                 /* surface-bright: canvas panel, menus */
+  --sk-line: rgba(0, 0, 0, 0.08);       /* on-surface-low */
+  --sk-line-faint: rgba(0, 0, 0, 0.05);
+  --sk-text-strong: #000000;            /* on-surface */
+  --sk-text: rgba(0, 0, 0, 0.78);
+  --sk-text-faint: rgba(0, 0, 0, 0.55); /* on-surface-variant */
+  --sk-icon: rgba(0, 0, 0, 0.7);
+  --sk-icon-faint: rgba(0, 0, 0, 0.45);
+  --sk-accent: #3186ff;                 /* accent-fixed: links, active marks */
+  --sk-accent-soft: #dcf1ff;            /* accent-container */
+  --sk-accent-text: #3186ff;
+  --sk-accent-fill: #9dd2ff;            /* the one committing action */
+  --sk-on-accent: #000000;              /* its label stays on-surface */
+  --sk-success: #008052;
+  --sk-success-soft: #daf9d4;
+  --sk-danger: #de2d29;
+  --sk-danger-soft: #ffdeec;
+  --sk-warning: #e97400;
+  --sk-warning-soft: #ffe2be;
+  --sk-font: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro", "Helvetica Neue", sans-serif;
+  --sk-text-size: 13px;
+  --sk-radius-sm: 8px;
+  --sk-radius-md: 12px;
+  --sk-radius-lg: 16px;
+  --sk-radius-window: 20px;
+  --sk-control: 36px;
+  --sk-row: 28px;
+  --sk-caret: #000000;
+  /* Elevation is a glow with no stroke: level 1 for floats, level 2 for
+     things on a float. */
+  --sk-shadow-hero: 0 0 20px rgba(0, 0, 0, 0.11), 0 16px 40px -12px rgba(0, 0, 0, 0.1);
+  --sk-shadow-window: 0 0 20px rgba(0, 0, 0, 0.11);
+  --sk-shadow-satellite: 0 0 20px rgba(0, 0, 0, 0.11);
+  --sk-shadow-ground: 0 0 20px rgba(0, 0, 0, 0.04);
+  --sk-shadow-float: 0 0 20px rgba(0, 0, 0, 0.11);
+  --sk-shadow-lift: 0 0 24px rgba(0, 0, 0, 0.16);
+  --sk-shadow-card: 0 0 20px rgba(0, 0, 0, 0.04);
+}
+
+.look-appbuilder .sk-btn {
+  height: 32px;
+  padding: 0 14px;
+  font-size: 13px;
+}
+
+/* Luminous buttons are pills. */
+.look-appbuilder .sk-btn.primary,
+.look-appbuilder .sk-btn.secondary {
+  border-radius: var(--sk-radius-pill);
+}
+
+.look-appbuilder .sk-btn.secondary {
+  background: #ffffff;
+  box-shadow: inset 0 0 0 1px var(--sk-line);
+}
+
+.look-appbuilder .sk-field {
+  border-radius: var(--sk-radius-md);
+  background: var(--sk-raised);
+  box-shadow: inset 0 0 0 1px var(--sk-line);
+}
+
+.look-appbuilder .sk-field[data-focus] {
+  box-shadow: inset 0 0 0 1px var(--sk-accent), 0 0 0 3px var(--sk-accent-soft);
+}
+
+.look-appbuilder .sk-row[data-selected],
+.look-appbuilder .sk-row[aria-selected="true"] {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.look-appbuilder .sk-tab[data-selected],
+.look-appbuilder .sk-tab[aria-selected="true"] {
+  background: #ffffff;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.04), inset 0 0 0 1px var(--sk-line);
+}
+
+.look-appbuilder .sk-icon.material-symbols-rounded {
+  font-size: 18px;
+  line-height: 1;
+  width: 18px;
+  height: 18px;
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 20;
+}
+
+/* The real-UI stage: light glass over the Shippable page's old plate tint.
+   The browser window keeps Chrome's 12px radius, not Luminous's 20px. */
+.look-appbuilder.sk-stage,
+.look-appbuilder.sk-stage[data-theme],
+.look-appbuilder .sk-bwin {
+  --sk-field-a: #e9f1fb;
+  --sk-field-b: #f7f8fb;
+  --sk-field-glow: rgb(49 134 255 / 0.22);
+  --sk-field-glow-2: rgb(255 181 0 / 0.16);
+  --sk-field-dot: rgb(40 60 100 / 0.08);
+  --sk-glass-bar: rgb(255 255 255 / 0.62);
+  --sk-glass-omni: rgb(255 255 255 / 0.74);
+  --sk-glass-tab: rgb(255 255 255 / 0.86);
+  --sk-glass-rim: rgb(255 255 255 / 0.6);
+  --sk-wash: #ffffff;
+}

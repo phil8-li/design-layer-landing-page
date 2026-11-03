@@ -1,0 +1,326 @@
+/*
+ * Stage "system": the real editor (midday captures) bare, filling the stage,
+ * and the inspector rebuilt at 1:1 and grown in place over its own column at
+ * the right edge. The unit stays up
+ * for all three beats (the same spot) and morphs between the Design system
+ * tab and the Design tab. Strings and sizes are copied from system-2400,
+ * tokens-2400 and audit-2400 (capture CSS px). Scoped under .st-sys.
+ */
+
+/* The capture: the whole scene, under everything. */
+.st-sys .sk-screen { position: absolute; inset: 0; overflow: hidden; }
+
+/* ---------- The lifted inspector ---------- */
+
+.st-sys .unit {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 5;
+  overflow: hidden;
+  width: 280px;
+  opacity: 0;
+  /* The panel, flush with the scene's top, right and bottom edges: square,
+     as the inspector column it grows over. */
+  border-radius: 0;
+  background: var(--sk-surface);
+  color: var(--sk-text);
+  font-size: 12px;
+  line-height: 16px;
+  transition: opacity 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.st-sys .tabs-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 39px;
+  padding: 0 7px;
+  box-shadow: inset 0 -1px 0 var(--sk-line-faint);
+}
+
+.st-sys .tabs { position: relative; display: flex; gap: 2px; }
+
+.st-sys .tab {
+  position: relative;
+  z-index: 1;
+  padding: 0 8px;
+  color: var(--sk-text);
+  font-size: 13px;
+  line-height: 26px;
+  transition: color 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.st-sys .tab[data-selected] { color: var(--sk-text-strong); }
+
+.st-sys .tab-ind {
+  position: absolute;
+  top: 0;
+  height: 26px;
+  border-radius: 6px;
+  background: #2a2c30;
+  transition: left 200ms cubic-bezier(0.4, 0, 0.2, 1), width 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Two tab bodies in one spot: a swap only crossfades (200ms); the panel
+   keeps its height. */
+.st-sys .tbody {
+  position: absolute;
+  top: 39px;
+  right: 0;
+  left: 0;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 200ms cubic-bezier(0.4, 0, 0.2, 1), visibility 0s 200ms;
+}
+
+.st-sys .tbody[data-active] { opacity: 1; visibility: visible; transition: opacity 200ms cubic-bezier(0.4, 0, 0.2, 1), visibility 0s; }
+
+/* A body taller than the unit is cut at its foot with the kit's fade. */
+.st-sys .unit .foot {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 2;
+  height: 56px;
+  background: linear-gradient(transparent, var(--sk-surface));
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.st-sys .unit[data-cut] .foot { opacity: 1; }
+
+/* ---------- Sections ---------- */
+
+.st-sys .sec { box-shadow: inset 0 -1px 0 var(--sk-line-faint); }
+.st-sys .sec-body { padding: 0 9px 12px; }
+
+.st-sys .sec-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 33px;
+  padding: 0 9px 0 9px;
+  color: var(--sk-text-strong);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.st-sys .sec-head .tail { display: flex; align-items: center; gap: 10px; margin-left: auto; color: var(--sk-icon-faint); font-weight: 400; }
+.st-sys .sec-head .count { color: var(--sk-text); font-size: 13px; }
+.st-sys .chev { transition: rotate 200ms cubic-bezier(0.4, 0, 0.2, 1); }
+.st-sys .sec[data-closed] .chev { rotate: -90deg; }
+
+.st-sys svg.fillicon { fill: currentColor; stroke: none; }
+
+/* A height that opens and closes in place: grid rows 0fr ↔ 1fr. */
+.st-sys .fold { display: grid; grid-template-rows: 1fr; transition: grid-template-rows 250ms cubic-bezier(0.4, 0, 0.2, 1); }
+.st-sys .fold > div { min-height: 0; overflow: hidden; }
+.st-sys [data-closed] > .fold,
+.st-sys .fold[data-closed] { grid-template-rows: 0fr; }
+
+/* A count that changes rolls in place: old up and out, new up and in. */
+.st-sys .roll { display: inline-flex; overflow: hidden; height: 16px; line-height: 16px; vertical-align: top; font-variant-numeric: tabular-nums; }
+.st-sys .roll > span { display: flex; flex-direction: column; transition: translate 300ms cubic-bezier(0.4, 0, 0.2, 1); }
+.st-sys .roll > span > b { display: block; height: 16px; font-weight: inherit; }
+.st-sys .roll[data-next] > span { translate: 0 -16px; }
+
+/* ---------- Libraries ---------- */
+
+.st-sys .lib {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  column-gap: 10px;
+  margin: 4px 0 10px;
+  padding: 7px 10px 7px 9px;
+  border-radius: 8px;
+  background: #212121;
+  box-shadow: inset 0 0 0 1px #343434;
+}
+
+.st-sys .lib-name { color: var(--sk-text-strong); font-size: 13px; line-height: 20px; }
+.st-sys .lib-path { grid-column: 1 / -1; color: var(--sk-text); font: 12px / 18px var(--sk-mono); }
+.st-sys .lib .sk-toggle { background: var(--sk-accent-fill); }
+.st-sys .lib .x { color: var(--sk-text); }
+
+.st-sys .new-lib .lib { transition: opacity 600ms cubic-bezier(0.25, 0.8, 0.25, 1), translate 600ms cubic-bezier(0.25, 0.8, 0.25, 1); }
+.st-sys .new-lib[data-closed] .lib { opacity: 0; translate: 0 -12px; }
+.st-sys .new-lib { transition-duration: 600ms; transition-timing-function: cubic-bezier(0.25, 0.8, 0.25, 1); }
+
+.st-sys .add-row { display: flex; gap: 4px; }
+
+.st-sys .url {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  height: 23px;
+  padding: 0 5px;
+  border-radius: 4px;
+  box-shadow: inset 0 0 0 1px #5a5a5a;
+  color: var(--sk-text-strong);
+  font: 12px / 16px var(--sk-mono);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.st-sys .url[data-focus] { box-shadow: inset 0 0 0 1px var(--sk-accent); }
+.st-sys .url .ph { color: var(--sk-text); }
+.st-sys .url[data-filled] .ph { display: none; }
+.st-sys .url .sk-caret { height: 14px; }
+
+.st-sys .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 23px;
+  padding: 0 8px;
+  border-radius: 5px;
+  background: #333;
+  color: var(--sk-text-strong);
+  font-size: 13px;
+  white-space: nowrap;
+  transition: background-color 120ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.st-sys .btn[data-press] { background: #444; }
+.st-sys .btn.primary { padding: 0 10px; background: var(--sk-accent-fill); color: #fff; }
+.st-sys .btn.primary[data-press] { background: #3d4fe0; }
+.st-sys .btn.muted { background: #2a2a2a; color: var(--sk-text-faint); }
+
+.st-sys .disc { display: flex; align-items: center; gap: 6px; height: 28px; margin-top: 4px; color: var(--sk-text); font-size: 12.5px; }
+
+/* ---------- DS lint ---------- */
+
+.st-sys .btn-row { display: flex; gap: 4px; }
+.st-sys .btn-row > .btn { flex: 1; }
+.st-sys .btn-row.hide { margin-top: 5px; }
+.st-sys .btn-row.hide > .btn { flex: none; }
+
+.st-sys .busy { position: relative; display: grid; width: 14px; place-items: center; }
+.st-sys .busy > * { grid-area: 1 / 1; }
+.st-sys .spin {
+  width: 10px;
+  height: 10px;
+  border: 1.5px solid rgb(255 255 255 / 0.25);
+  border-top-color: #fff;
+  border-radius: 50%;
+  opacity: 0;
+  animation: st-sys-spin 700ms linear infinite;
+}
+.st-sys .btn[data-busy] .spin { opacity: 1; }
+.st-sys .btn[data-busy] .busy > svg { opacity: 0; }
+.st-sys .busy > svg { width: 14px; height: 14px; }
+
+@keyframes st-sys-spin { to { rotate: 360deg; } }
+
+.st-sys .results > * { transition: opacity 240ms cubic-bezier(0.25, 0.8, 0.25, 1), translate 240ms cubic-bezier(0.25, 0.8, 0.25, 1); transition-delay: calc(var(--i, 0) * 40ms); }
+.st-sys .results[data-off] > * { opacity: 0; translate: 0 6px; transition-duration: 0ms; transition-delay: 0ms; }
+
+.st-sys .summary { margin-top: 10px; color: var(--sk-text-strong); font-size: 12.5px; line-height: 16px; }
+
+.st-sys .group {
+  display: flex;
+  gap: 8px;
+  margin: 10px -9px 0;
+  padding: 8px 12px 6px;
+  box-shadow: inset 0 1px 0 var(--sk-line-faint);
+  color: var(--sk-text-strong);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.st-sys .group .n { color: var(--sk-text); font-weight: 400; }
+
+.st-sys .find {
+  display: grid;
+  grid-template-columns: 16px 10px 1fr;
+  column-gap: 7px;
+  padding: 8px 0 4px 8px;
+  font-size: 12.5px;
+  line-height: 18px;
+}
+
+.st-sys .find .box { width: 13px; height: 13px; margin-top: 2px; border-radius: 3px; box-shadow: inset 0 0 0 1px #6a6a6a; }
+.st-sys .find .sq { width: 7px; height: 7px; margin-top: 5px; background: #ff606a; }
+.st-sys .find .code { color: var(--sk-text-strong); white-space: nowrap; }
+.st-sys .find .meta { color: var(--sk-text); }
+.st-sys .find .file { display: flex; justify-content: space-between; gap: 6px; color: var(--sk-text); white-space: nowrap; }
+.st-sys .find .badge { padding: 0 4px; border-radius: 3px; background: #333; color: var(--sk-text); }
+
+/* ---------- Design tab: Fill and the token popover ---------- */
+
+.st-sys .lab { height: 20px; color: var(--sk-text); font-size: 12.5px; }
+
+.st-sys .fields { display: flex; gap: 6px; }
+
+.st-sys .fld {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 8px;
+  height: 26px;
+  padding: 0 7px;
+  border-radius: 5px;
+  background: #242424;
+  color: var(--sk-text-strong);
+  font-size: 12.5px;
+  white-space: nowrap;
+}
+
+.st-sys .fld .k { color: var(--sk-text); }
+.st-sys .fld .end { margin-left: auto; color: var(--sk-text); }
+.st-sys .fill-row { display: flex; align-items: center; gap: 8px; }
+.st-sys .fill-row .fld:first-child { flex: 1.25; }
+.st-sys .fill-row .trail { display: flex; gap: 10px; align-items: center; color: var(--sk-text); font-size: 14px; line-height: 1; }
+.st-sys .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--sk-text); }
+
+.st-sys .swatch { width: 14px; height: 14px; flex: none; border-radius: 3px; background: var(--c, #18181b); box-shadow: inset 0 0 0 1px #5a5a5a; }
+
+.st-sys .fill-val { display: grid; }
+.st-sys .fill-val > * { grid-area: 1 / 1; transition: opacity 200ms cubic-bezier(0.4, 0, 0.2, 1); }
+.st-sys .fill-val .tok { opacity: 0; }
+.st-sys .unit[data-token] .fill-val .tok { opacity: 1; }
+.st-sys .unit[data-token] .fill-val .hex { opacity: 0; }
+
+.st-sys .pop-wrap { padding: 0 8px; }
+.st-sys .pop-wrap > div { padding-top: 8px; }
+
+.st-sys .pop {
+  overflow: hidden;
+  border-radius: 10px;
+  background: #2b2b2b;
+  box-shadow: inset 0 0 0 1px #3a3a3a, 0 12px 24px rgb(0 0 0 / 0.35);
+}
+
+.st-sys .pop-head { display: flex; align-items: center; justify-content: space-between; height: 36px; padding: 0 10px 0 12px; color: var(--sk-text-strong); font-size: 13px; font-weight: 600; }
+.st-sys .pop-search { display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px; box-shadow: inset 0 1px 0 #3a3a3a, inset 0 -1.5px 0 var(--sk-accent); color: var(--sk-text); font-size: 13px; }
+.st-sys .pop-label { padding: 9px 12px 3px; color: var(--sk-text); font-size: 13px; font-weight: 600; }
+
+.st-sys .tok-list { height: 238px; overflow: hidden; -webkit-mask-image: linear-gradient(#000 200px, transparent); mask-image: linear-gradient(#000 200px, transparent); }
+
+.st-sys .tok-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 26px;
+  margin: 1px 6px;
+  padding: 0 7px;
+  border-radius: 6px;
+  color: var(--sk-text-strong);
+  font-size: 13px;
+  transition: background-color 120ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.st-sys .tok-row .swatch { --c: #1e1e1e; width: 16px; height: 16px; box-shadow: inset 0 0 0 1px #4a4a4a; }
+.st-sys .tok-row[data-focus] { box-shadow: inset 0 0 0 1px var(--sk-accent); }
+.st-sys .tok-row[data-hover] { background: #3a3a3a; }
+.st-sys .tok-row[data-press] { background: #444; }
+
+.st-sys .pop-foot { display: flex; justify-content: space-between; height: 30px; align-items: center; padding: 0 12px; box-shadow: inset 0 1px 0 #3a3a3a; color: var(--sk-text); font-size: 12.5px; }
+
+.st-sys .pop-wrap[data-closed] .pop { opacity: 0; scale: 0.98; }
+.st-sys .pop { transform-origin: 50% 100%; transition: opacity 160ms cubic-bezier(0.4, 0, 0.2, 1), scale 160ms cubic-bezier(0.4, 0, 0.2, 1); }

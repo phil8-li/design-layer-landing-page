@@ -1,0 +1,276 @@
+/*
+ * Stage "edit": the real editor (a midday capture) bare, filling the stage,
+ * and the one unit each beat is about rebuilt and lifted in place over it.
+ * Every px here is a capture CSS px (the 1600 × 1000 page the 2400 files were
+ * shot from); edit.js owns placement. Scoped under .st-edit.
+ */
+
+@font-face {
+  font-family: "Hedvig Letters Serif";
+  src: url("../assets/fonts/HedvigLettersSerif-latin.woff2") format("woff2");
+  font-display: block;
+}
+
+@font-face {
+  font-family: "Inter Stage";
+  src: url("../assets/fonts/InterVariable-latin.woff2") format("woff2");
+  font-weight: 100 900;
+  font-display: block;
+}
+
+/* The capture: the whole scene, under everything. */
+.st-edit .sk-screen { position: absolute; inset: 0; overflow: hidden; }
+
+/* ---------- Lifted units ---------- */
+
+/* A unit is a piece of the page (or of a panel) cut out with 16px of its own
+   ground, so at the lift's first frame it lies on the capture seamlessly. */
+.st-edit .unit {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 5;
+  box-sizing: border-box;
+  opacity: 0;
+  border-radius: 12px;
+  transition: opacity 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.st-edit .unit.page {
+  background: #faf8f4;
+  color: #121212;
+  font-family: "Inter Stage", var(--sk-font);
+}
+
+.st-edit .unit.panel {
+  background: var(--sk-surface);
+  color: var(--sk-text);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.st-edit .abs { position: absolute; }
+
+/* The editor's selection: a 1px indigo outline, white handles on an indigo rim. */
+.st-edit .sel {
+  position: absolute;
+  inset: 0;
+  outline: 1px solid var(--sk-accent);
+  pointer-events: none;
+}
+
+.st-edit .sel > i {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  margin: -3px 0 0 -3px;
+  background: #fff;
+  box-shadow: inset 0 0 0 1px var(--sk-accent);
+}
+
+/* ---------- The headline (Direct edit, Measure) ---------- */
+
+.st-edit .head {
+  box-sizing: border-box;
+  width: 768px;
+  height: 120px;
+  padding: 0 7.5px;
+  color: #121212;
+  font: 400 60px / 60px "Hedvig Letters Serif", Georgia, serif;
+  letter-spacing: -1.5px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.st-edit .head .line { display: block; }
+
+.st-edit .word { border-radius: 2px; transition: background-color 120ms cubic-bezier(0.4, 0, 0.2, 1); }
+.st-edit .word[data-sel] { background: color-mix(in srgb, #798cff 34%, transparent); }
+.st-edit .head .sk-caret { --sk-caret: #121212; width: 2px; height: 0.9em; vertical-align: -0.08em; }
+
+.st-edit .sub {
+  width: 768px;
+  color: #5c5c5c;
+  font-size: 18px;
+  line-height: 29px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.st-edit .cta {
+  display: grid;
+  place-items: center;
+  width: 120px;
+  height: 44px;
+  border-radius: 999px;
+  background: #121212;
+  color: #fafafa;
+  font-size: 15px;
+  font-weight: 450;
+  box-shadow: 0 6px 16px rgb(0 0 0 / 0.16);
+  transition: background-color 160ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.st-edit .cta[data-hover] { background: #2e3032; }
+
+/* The hover box: square, on the button's edge, as measure-2400.webp draws it. */
+.st-edit .cta .hov {
+  position: absolute;
+  inset: 0;
+  outline: 1px solid var(--sk-accent);
+  opacity: 0;
+  transition: opacity 120ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.st-edit .cta[data-hover] .hov { opacity: 1; }
+
+/* ⌥ distance: a 1px red guide from the headline's foot to the button's top,
+   drawn from the top in 400ms, and the red "120" tag on it. */
+.st-edit .guide {
+  width: 1px;
+  background: #d24545;
+  transform-origin: 50% 0;
+  scale: 1 0;
+  transition: scale 400ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 13px, so the number reads at 11px or more on the page at 1440. */
+.st-edit .guide-label {
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 3px;
+  background: #fa3e47;
+  color: #fff;
+  font: 500 13px / 18px var(--sk-font);
+  font-variant-numeric: tabular-nums;
+  translate: 0 -50%;
+  opacity: 0;
+  transition: opacity 200ms cubic-bezier(0.4, 0, 0.2, 1) 200ms;
+}
+
+.st-edit .unit[data-measure] .guide { scale: 1 1; }
+.st-edit .unit[data-measure] .guide-label { opacity: 1; }
+
+/* ---------- The feature cards (Align) ---------- */
+
+.st-edit .card {
+  width: 150px;
+  height: 118px;
+  translate: 0 var(--dy, 0px);
+  transition: translate 700ms cubic-bezier(0.45, 0, 0.1, 1);
+}
+
+.st-edit .unit[data-aligned] .card { translate: 0 0; }
+
+/* The tile is the capture's own pixels: the demo app's Lucide glyphs are not
+   in the editor's sprite, and drawing them is not allowed. */
+.st-edit .tile {
+  position: absolute;
+  left: 45px;
+  top: 2px;
+  width: 60px;
+  height: 58px;
+  background-image: var(--shot);
+  background-size: 1600px 1000px;
+  background-position: var(--bx) var(--by);
+}
+
+.st-edit .card .t,
+.st-edit .card .s {
+  position: absolute;
+  left: -20px;
+  right: -20px;
+  font-size: 15px;
+  line-height: 20px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.st-edit .card .t { top: 76px; color: #121212; }
+.st-edit .card .s { top: 97px; color: #6e6e6e; }
+
+.st-edit .card .sel,
+.st-edit .gbox {
+  opacity: 0;
+  transition: opacity 120ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.st-edit .card[data-sel] .sel { opacity: 1; }
+
+/* The multi-selection's box, as the editor draws it: a dim outline that hugs
+   all three cards (the 47px stair included) and closes to 118px as they
+   level, on the same curve. A little outside the cards so it never sits on
+   their own outlines. */
+.st-edit .gbox {
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  width: 618px;
+  height: 173px;
+  outline: 1px solid color-mix(in srgb, var(--sk-accent) 45%, transparent);
+  pointer-events: none;
+  transition: opacity 160ms cubic-bezier(0.4, 0, 0.2, 1), height 700ms cubic-bezier(0.45, 0, 0.1, 1);
+}
+
+.st-edit .unit[data-group] .gbox { opacity: 1; }
+.st-edit .unit[data-aligned] .gbox { height: 126px; }
+
+/* ---------- The inspector's Align top button (Align) ---------- */
+
+/* Built at the capture's own button size (edit.js places it at the capture's
+   scale, on the button): the inspector itself stays the capture. Hidden at
+   rest; on hover it lifts out of the wash, on the press it takes the editor's
+   pressed fill for 120ms. */
+.st-edit .align-btn {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 6;
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  border-radius: 5px;
+  background: #2b2b2b;
+  color: #f2f2f2;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms cubic-bezier(0.4, 0, 0.2, 1), background-color 90ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.st-edit .align-btn[data-hover] { opacity: 1; }
+.st-edit .align-btn[data-press] { background: #46505a; }
+.st-edit .align-btn svg { width: 15px; height: 15px; }
+
+/* The cards' unit holds the 47px drop, then closes to the cards as they level. */
+.st-edit .cards-u { height: 197px; transition: opacity 300ms cubic-bezier(0.4, 0, 0.2, 1), height 700ms cubic-bezier(0.45, 0, 0.1, 1); }
+.st-edit .cards-u[data-aligned] { height: 150px; }
+
+.st-edit svg.fillicon { fill: currentColor; stroke: none; }
+
+/* The button's tooltip, in the keycaps' dark pill: scene px (not capture
+   px), so its 12px text reads in both layouts. edit.js places it. */
+.st-edit .align-tip {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 7;
+  height: 22px;
+  padding: 0 8px;
+  border: 1px solid rgb(255 255 255 / 0.16);
+  border-radius: 6px;
+  background: #262626;
+  box-shadow: 0 6px 16px rgb(0 0 0 / 0.28);
+  color: #fafafa;
+  font: 500 12px / 20px var(--sk-font);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.st-edit .align-tip[data-show] { opacity: 1; }
+
+/* Keycaps sit above the capture's toolbar (scene y 592 wide, 212 compact),
+   never on it. */
+.st-edit .sk-keys { bottom: 52px; }
+.st-edit[data-layout="compact"] .sk-keys { bottom: 16px; }
